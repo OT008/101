@@ -31,13 +31,9 @@
     width:25px;height:25px;border:none;border-radius:4px;cursor:pointer;
     color:white;font-weight:bold;font-size:14px;
   }
-  .ceza-satiri .azalt{
-    background:#e74c3c; /* kırmızı */
-  }
+  .ceza-satiri .azalt{background:#e74c3c;}
   .ceza-satiri .azalt:hover{background:#c0392b;}
-  .ceza-satiri .artir{
-    background:#2ecc71; /* yeşil */
-  }
+  .ceza-satiri .artir{background:#2ecc71;}
   .ceza-satiri .artir:hover{background:#27ae60;}
 </style>
 </head>
@@ -119,6 +115,7 @@ function oyunaBasla(){
           <span class='secenek bitme'>Bitti</span>
           <span class='secenek bitme'>Elden Bitti</span>
           <span class='secenek bitme'>Çiftle Bitti</span>
+          <span class='secenek okey hidden'>Okey ile</span>
         </div>
         <div class='kategori kat3'>
           <h4>3️⃣ Cezalar / Masa Aşımı</h4>
@@ -152,6 +149,7 @@ function aktiflestirDavranislar(){
     const kat1=cell.querySelector(".kat1"), kat2=cell.querySelector(".kat2");
     const acmadi=kat1.querySelector(".acmadi"), elinde=kat1.querySelector(".elinde");
     const bitmeler=kat2.querySelectorAll(".bitme");
+    const okey=kat2.querySelector(".okey");
     const masaBtn=cell.querySelector(".masa");
 
     // 1️⃣ AÇMA
@@ -176,20 +174,25 @@ function aktiflestirDavranislar(){
       }
     });
 
-    // 2️⃣ BİTME
+    // 2️⃣ BİTME TÜRLERİ + OKEY İLE
     bitmeler.forEach(bit=>{
       bit.addEventListener("click",()=>{
         const aktifMi=bit.classList.contains("aktif");
-        bitmeler.forEach(b=>b.classList.remove("aktif"));
+        bitmeler.forEach(b=>{b.classList.remove("aktif");b.style.display="inline-block";});
         if(aktifMi){
           kat1.style.display="block";
-          bitmeler.forEach(b=>b.style.display="inline-block");
+          okey.classList.add("hidden");
+          okey.classList.remove("aktif");
         }else{
           bit.classList.add("aktif");
           kat1.style.display="none";
           bitmeler.forEach(b=>{if(b!==bit)b.style.display="none";});
+          okey.classList.remove("hidden");
         }
       });
+    });
+    okey.addEventListener("click",()=>{
+      okey.classList.toggle("aktif");
     });
 
     // 3️⃣ MASA AŞTI
@@ -214,7 +217,7 @@ function aktiflestirDavranislar(){
     });
   });
 
-  // 🧩 EL KİLİTLEME
+  // 🧩 AKILLI EL KİLİTLEME
   const rows=document.querySelectorAll("#skorTablo tr");
   rows.forEach((row,idx)=>{
     if(idx===0)return;
@@ -228,10 +231,27 @@ function aktiflestirDavranislar(){
 function kilitleOnceki(satirIndex){
   const rows=document.querySelectorAll("#skorTablo tr");
   if(satirIndex>1){
-    const onceki=rows[satirIndex-1];
-    if(!onceki.classList.contains("locked")){
-      onceki.classList.add("locked");
-      onceki.querySelectorAll("input, .secenek, button").forEach(e=>e.disabled=true);
+    const prev=rows[satirIndex-1];
+    const current=rows[satirIndex];
+    const currentInputs=current.querySelectorAll("input, .secenek.aktif, .deger");
+    const currentHasValue=[...currentInputs].some(el=>{
+      if(el.classList && el.classList.contains("deger")) return parseInt(el.textContent)>0;
+      if(el.tagName==="INPUT"&&el.type==="number") return el.value!=="";
+      return el.classList && el.classList.contains("aktif");
+    });
+
+    // Eğer mevcut elde veri varsa, önceki el kilitlensin
+    if(currentHasValue){
+      if(!prev.classList.contains("locked")){
+        prev.classList.add("locked");
+        prev.querySelectorAll("input, .secenek, button").forEach(e=>e.disabled=true);
+      }
+    } else {
+      // Eğer mevcut elde hiçbir şey yoksa önceki el yeniden açılabilir
+      if(prev.classList.contains("locked")){
+        prev.classList.remove("locked");
+        prev.querySelectorAll("input, .secenek, button").forEach(e=>e.disabled=false);
+      }
     }
   }
 }
