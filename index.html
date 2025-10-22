@@ -4,84 +4,43 @@
 <meta charset="UTF-8">
 <title>Okey 101 Skor Takip Sistemi</title>
 <style>
-  body { font-family: "Segoe UI", sans-serif; background:#f3f6fb; color:#2c3e50; margin:0; padding:0;}
-  h1 { text-align:center; padding:20px; background:#4a90e2; color:white; margin:0 0 20px;}
-  .container { max-width:1000px; margin:auto; background:white; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.1); padding:20px;}
-  label { display:block; margin-top:10px; font-weight:600;}
-  input,select { padding:5px 10px; margin-top:5px; border-radius:6px; border:1px solid #ccc; width:100%; box-sizing:border-box;}
-  table { width:100%; border-collapse:collapse; margin-top:20px;}
-  th,td { border:1px solid #ddd; text-align:center; vertical-align:middle; padding:8px;}
-  th { background:#4a90e2; color:white;}
-  .btn { background:#4a90e2; color:white; border:none; padding:10px 20px; border-radius:6px; cursor:pointer; margin-top:20px; font-weight:bold;}
-  .btn:hover { background:#357ABD;}
-  .flex { display:flex; gap:10px;}
-  .half { width:48%;}
-  .hidden { display:none;}
-  .section-title { background:#e9f0ff; padding:10px; font-weight:bold; margin-top:20px; border-radius:6px;}
-  .takimBilgi { background:#f9f9f9; padding:10px; margin-top:10px; border-radius:8px; text-align:center; font-weight:600; color:#333;}
-  .player-cell { text-align:center; font-size:13px; }
-  .player-cell label { display:inline-block; margin:2px 5px; font-weight:normal;}
-  .player-cell input[type="checkbox"] { transform:scale(1.1); margin-right:4px;}
-  .player-cell input[type="number"] { width:60px; text-align:center;}
+  body {font-family:"Segoe UI",sans-serif;background:#f3f6fb;color:#2c3e50;margin:0;padding:0;}
+  h1{text-align:center;padding:20px;background:#4a90e2;color:white;margin:0 0 20px;}
+  .container{max-width:1100px;margin:auto;background:white;border-radius:10px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);padding:20px;}
+  label{font-weight:600;}
+  input,select{padding:5px 8px;border-radius:6px;border:1px solid #ccc;}
+  table{width:100%;border-collapse:collapse;margin-top:20px;}
+  th,td{border:1px solid #ddd;text-align:center;vertical-align:middle;padding:8px;}
+  th{background:#4a90e2;color:white;}
+  .btn{background:#4a90e2;color:white;border:none;padding:10px 20px;border-radius:6px;
+    cursor:pointer;margin-top:20px;font-weight:bold;}
+  .btn:hover{background:#357ABD;}
+  .hidden{display:none;}
+  .kategori{border:1px solid #eee;margin:2px;padding:3px;border-radius:5px;background:#f9f9f9;}
+  .kategori h4{margin:2px 0;font-size:13px;color:#4a90e2;}
+  .kategori label{font-weight:normal;margin-right:5px;}
+  .player-cell{font-size:13px;text-align:center;}
+  input[type="number"]{width:60px;text-align:center;}
+  .locked{opacity:0.6;pointer-events:none;}
 </style>
 </head>
 <body>
 <h1>🧮 Okey 101 Skor Takip Sistemi</h1>
 
-<!-- ⚙️ ANA SAYFA -->
 <div class="container" id="ayarEkrani">
-  <div class="section-title">Oyun Ayarları</div>
-  <label>Oyun Türü:</label>
-  <select id="oyunTuru" onchange="oyunTuruDegisti()">
-    <option value="tek">Tekli</option>
-    <option value="esli">Eşli</option>
-  </select>
-
-  <div id="esliSecenekleri" class="hidden">
-    <label>Eşli Oyun Tipi:</label>
-    <select id="esliTipi" onchange="oyunTuruDegisti()">
-      <option value="birlikte">Birlikte (takım puanı)</option>
-      <option value="ayri">Ayrı Ayrı (bireysel puan)</option>
-    </select>
-  </div>
-
+  <h3>Oyun Ayarları</h3>
   <label>Kaç tur oynanacak?</label>
-  <input type="number" id="turSayisi" min="1" max="50" value="10">
-
-  <div id="oyuncularAlani" class="section-title">İsimler</div>
-  <div id="isimler"></div>
-
-  <div class="section-title">Puanlama Ayarları</div>
-  <div class="flex">
-    <div class="half">
-      <label>Açamama (+)</label><input type="number" id="p_acamama" value="202">
-      <label>Bitirme (-)</label><input type="number" id="p_bitirme" value="-101">
-      <label>Okey ile Bitirme (-)</label><input type="number" id="p_okeybit" value="-202">
-      <label>Çiftle Bitirme (-)</label><input type="number" id="p_ciftbit" value="-202">
-    </div>
-    <div class="half">
-      <label>Elden Bitirme (-)</label><input type="number" id="p_eldenbit" value="-202">
-      <label>Elden Okey ile Bitme (-)</label><input type="number" id="p_eldenokey" value="-404">
-      <label>Çiftle Okey ile Bitme (-)</label><input type="number" id="p_ciftokey" value="-404">
-      <label>Masa Sayısını Aşma (-)</label><input type="number" id="p_masaAsma" value="-101">
-    </div>
-  </div>
-
-  <div class="section-title">Ceza Puanları</div>
-  <div class="flex">
-    <div class="half">
-      <label>İşlek Atma (+)</label><input type="number" id="c_islek" value="101">
-      <label>Okey Kaptırma (+)</label><input type="number" id="c_okeykaptir" value="101">
-    </div>
-    <div class="half">
-      <label>Hatalı Açma (+)</label><input type="number" id="c_hatali" value="101">
-    </div>
-  </div>
-
+  <input type="number" id="turSayisi" min="1" max="50" value="10"><br><br>
+  <label>Oyuncular:</label><br>
+  <input id="oy1" value="Oyuncu 1"> 
+  <input id="oy2" value="Oyuncu 2"> 
+  <input id="oy3" value="Oyuncu 3"> 
+  <input id="oy4" value="Oyuncu 4">
+  <br><br>
   <button class="btn" onclick="oyunaBasla()">OYUNA BAŞLA</button>
 </div>
 
-<!-- 🧮 OYUN TABLOSU -->
 <div class="container hidden" id="oyunEkrani">
   <div id="oyunBilgisi"></div>
   <table id="skorTablo"></table>
@@ -89,125 +48,121 @@
 </div>
 
 <script>
-function oyunTuruDegisti(){
-  const oyunTuru=document.getElementById("oyunTuru").value;
-  const esliTipi=document.getElementById("esliTipi")?document.getElementById("esliTipi").value:"";
-  const esliSecenekleri=document.getElementById("esliSecenekleri");
-  const isimler=document.getElementById("isimler");
-
-  if(oyunTuru==="tek"){
-    esliSecenekleri.classList.add("hidden");
-    isimler.innerHTML=`
-      <label>Oyuncu 1:</label><input id="oy1" value="Oyuncu 1">
-      <label>Oyuncu 2:</label><input id="oy2" value="Oyuncu 2">
-      <label>Oyuncu 3:</label><input id="oy3" value="Oyuncu 3">
-      <label>Oyuncu 4:</label><input id="oy4" value="Oyuncu 4">`;
-  } else if(oyunTuru==="esli" && esliTipi==="birlikte"){
-    esliSecenekleri.classList.remove("hidden");
-    isimler.innerHTML=`
-      <label>Takım 1 İsmi:</label><input id="takim1" value="Takım 1">
-      <label>Takım 2 İsmi:</label><input id="takim2" value="Takım 2">`;
-  } else {
-    esliSecenekleri.classList.remove("hidden");
-    isimler.innerHTML=`
-      <label>Oyuncu 1:</label><input id="oy1" value="Oyuncu 1">
-      <label>Oyuncu 2:</label><input id="oy2" value="Oyuncu 2">
-      <label>Oyuncu 3:</label><input id="oy3" value="Oyuncu 3">
-      <label>Oyuncu 4:</label><input id="oy4" value="Oyuncu 4">`;
-  }
-}
-oyunTuruDegisti();
-
 function oyunaBasla(){
-  const oyunTuru=document.getElementById("oyunTuru").value;
-  const esliTipi=document.getElementById("esliTipi").value;
   const turSayisi=parseInt(document.getElementById("turSayisi").value);
-  let oyuncular=[], takimBilgi="";
-
-  if(oyunTuru==="esli" && esliTipi==="birlikte"){
-    const t1=document.getElementById("takim1").value;
-    const t2=document.getElementById("takim2").value;
-    oyuncular=[t1,t2];
-    takimBilgi=`<div class='takimBilgi'>Eşli Oyun - Birlikte | Takımlar: ${t1} - ${t2}</div>`;
-  } else {
-    const o1=document.getElementById("oy1").value, o2=document.getElementById("oy2").value;
-    const o3=document.getElementById("oy3").value, o4=document.getElementById("oy4").value;
-    oyuncular=[o1,o2,o3,o4];
-    if(oyunTuru==="esli") takimBilgi=`<div class='takimBilgi'>Eşli Oyun - Ayrı Ayrı | Oyuncular bireysel puan alır.</div>`;
-  }
+  const oyuncular=[document.getElementById("oy1").value,document.getElementById("oy2").value,
+                   document.getElementById("oy3").value,document.getElementById("oy4").value];
 
   document.getElementById("ayarEkrani").classList.add("hidden");
   document.getElementById("oyunEkrani").classList.remove("hidden");
-
-  document.getElementById("oyunBilgisi").innerHTML=
-    `<h3>Oyun Türü: ${oyunTuru==="esli"?"Eşli":"Tekli"} | Tur: ${turSayisi}</h3>${takimBilgi}`;
 
   let html="<tr><th>El</th>";
   oyuncular.forEach(o=>html+=`<th>${o}</th>`);
   html+="</tr>";
 
-  for(let i=1;i<=turSayisi;i++){
-    html+=`<tr><td><b>${i}</b></td>`;
-    oyuncular.forEach((_,idx)=>{
-      html+=`
-      <td class='player-cell' id='cell_${i}_${idx}'>
-        <div class='grp'>
+  for(let el=1;el<=turSayisi;el++){
+    html+=`<tr><td><b>${el}</b></td>`;
+    oyuncular.forEach((o,idx)=>{
+      html+=`<td id='cell_${el}_${idx}' class='player-cell'>
+        <div class='kategori kat1'>
+          <h4>1️⃣ Açma Durumu</h4>
+          <label><input type='checkbox' class='acmadi'> Açamadı</label><br>
+          <label>Elinde: <input type='number' class='elinde' min='0' max='200' value=''></label>
+        </div>
+        <div class='kategori kat2'>
+          <h4>2️⃣ Bitme Türü</h4>
           <label><input type='checkbox' class='bitme'> Bitti</label>
-          <label><input type='checkbox' class='bitme'> Elden Bitti</label>
           <label><input type='checkbox' class='bitme'> Okey ile</label>
-          <label><input type='checkbox' class='bitme'> Çiftle</label>
+          <label><input type='checkbox' class='bitme'> Çiftle</label><br>
+          <label><input type='checkbox' class='bitme'> Elden Bitti</label>
           <label><input type='checkbox' class='bitme'> Elden Okey ile</label>
           <label><input type='checkbox' class='bitme'> Çiftle Okey ile</label>
         </div>
-        <div>
-          <label><input type='checkbox'> Açamadı</label>
-          <label><input type='checkbox'> Masa Aştı</label>
-        </div>
-        <div>
-          <label>Elinde:</label><input type='number' min='0' max='200'>
-        </div>
-        <div>
-          <label><input type='checkbox'> Hatalı Açma</label>
-          <label><input type='checkbox'> İşlek Atma</label>
-          <label><input type='checkbox'> Okey Kaptırma</label>
+        <div class='kategori kat3'>
+          <h4>3️⃣ Cezalar / Masa Aşımı</h4>
+          <label><input type='checkbox' class='masaAsti'> Masa Aştı</label><br>
+          <label>İşlek Atma: <input type='number' class='ceza islek' min='0' value='0'></label><br>
+          <label>Hatalı Açma: <input type='number' class='ceza hatali' min='0' value='0'></label><br>
+          <label>Okey Kaptırma: <input type='number' class='ceza kaptir' min='0' value='0'></label>
         </div>
       </td>`;
     });
     html+="</tr>";
   }
   document.getElementById("skorTablo").innerHTML=html;
-  attachBitmeRules(oyunTuru, esliTipi, oyuncular.length);
+  aktiflestirOlaylar();
 }
 
-function attachBitmeRules(oyunTuru, esliTipi, oyuncuSayisi){
-  document.querySelectorAll(".bitme").forEach(chk=>{
-    chk.addEventListener("change", e=>{
-      const td=e.target.closest("td");
-      const tr=e.target.closest("tr");
-      const i=parseInt(tr.cells[0].innerText);
-      const tdIndex=[...tr.cells].indexOf(td)-1;
+function aktiflestirOlaylar(){
+  const cells=document.querySelectorAll(".player-cell");
 
-      if(e.target.checked){
-        // diğer kutuları gizle
-        td.querySelectorAll("div").forEach(d=>{
-          if(!d.contains(e.target)) d.style.display="none";
-        });
-        if(oyunTuru==="esli" && esliTipi==="ayri"){
-          const partner=tdIndex%2===0?tdIndex+1:tdIndex-1;
-          const partnerCell=document.getElementById(`cell_${i}_${partner}`);
-          if(partnerCell) partnerCell.querySelectorAll("div").forEach(d=>d.style.display="none");
-        }
+  cells.forEach(cell=>{
+    const kat1=cell.querySelector(".kat1");
+    const kat2=cell.querySelector(".kat2");
+    const kat3=cell.querySelector(".kat3");
+    const acmadi=kat1.querySelector(".acmadi");
+    const elinde=kat1.querySelector(".elinde");
+    const bitmeler=kat2.querySelectorAll(".bitme");
+
+    // 1. Kategori davranışı
+    acmadi.addEventListener("change",()=>{
+      if(acmadi.checked || elinde.value!==""){
+        // sadece seçilen gözüksün, 2. kategori gizlensin
+        [...kat1.children].forEach(c=>{if(!c.contains(acmadi)&&!c.contains(elinde)) c.style.display="none";});
+        kat2.style.display="none";
       } else {
         // geri getir
-        td.querySelectorAll("div").forEach(d=>d.style.display="block");
-        if(oyunTuru==="esli" && esliTipi==="ayri"){
-          const partner=tdIndex%2===0?tdIndex+1:tdIndex-1;
-          const partnerCell=document.getElementById(`cell_${i}_${partner}`);
-          if(partnerCell) partnerCell.querySelectorAll("div").forEach(d=>d.style.display="block");
-        }
+        [...kat1.children].forEach(c=>c.style.display="block");
+        kat2.style.display="block";
       }
     });
+    elinde.addEventListener("input",()=>{
+      if(elinde.value!==""){
+        kat1.querySelector(".acmadi").style.display="none";
+        kat2.style.display="none";
+      } else {
+        kat1.querySelector(".acmadi").style.display="inline-block";
+        kat2.style.display="block";
+      }
+    });
+
+    // 2. Kategori davranışı
+    bitmeler.forEach(bit=>{
+      bit.addEventListener("change",()=>{
+        if(bit.checked){
+          bitmeler.forEach(b=>{if(b!==bit) b.parentElement.style.display="none";});
+          kat1.style.display="none";
+        } else {
+          bitmeler.forEach(b=>b.parentElement.style.display="inline-block");
+          kat1.style.display="block";
+        }
+      });
+    });
   });
+
+  // el kilitleme kontrolü
+  const rows=document.querySelectorAll("#skorTablo tr");
+  rows.forEach((row,idx)=>{
+    if(idx===0)return;
+    const inputs=row.querySelectorAll("input");
+    inputs.forEach(inp=>{
+      inp.addEventListener("change",()=>kilitKontrol(idx));
+    });
+  });
+}
+
+function kilitKontrol(currentRow){
+  const rows=document.querySelectorAll("#skorTablo tr");
+  // currentRow satırında işlem olunca, bir önceki satırı kilitle
+  if(currentRow>1){
+    const prevRow=rows[currentRow-1];
+    if(prevRow && !prevRow.classList.contains("lockedRow")){
+      prevRow.classList.add("lockedRow");
+      prevRow.querySelectorAll("input,select").forEach(i=>{
+        i.disabled=true;
+      });
+    }
+  }
 }
 
 function yeniOyun(){
