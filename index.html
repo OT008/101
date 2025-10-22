@@ -24,7 +24,11 @@
   .kategori h4{margin:2px 0;font-size:13px;color:#4a90e2;}
   .secenek{display:inline-block;margin:4px 6px;padding:3px 6px;border-radius:5px;cursor:pointer;transition:all .2s;}
   .secenek:hover{background:#e0edff;}
-  .secenek.aktif{background:#4a90e2;color:white;font-weight:bold;}
+.secenek.aktif{
+  background:#2ecc71; /* yeşil */
+  color:white;
+  font-weight:bold;
+}
   .locked input, .locked .secenek{pointer-events:none;opacity:0.6;}
   input[type="number"]{width:60px;text-align:center;}
 </style>
@@ -135,20 +139,29 @@ function aktiflestirDavranislar(){
       if(!acmadi.classList.contains("aktif")){
         acmadi.classList.add("aktif");
         elinde.disabled=true;
+        // Bitme kategorisini gizle
         kat2.style.display="none";
       }else{
         acmadi.classList.remove("aktif");
         elinde.disabled=false;
+        // Bitme kategorisini ve tüm seçenekleri geri getir
         kat2.style.display="block";
+        bitmeler.forEach(b=>{ b.style.display="inline-block"; b.classList.remove("aktif"); });
+        okey.classList.add("hidden"); okey.classList.remove("aktif");
       }
     });
+
     elinde.addEventListener("input",()=>{
       if(elinde.value!==""){
+        // sayı girildiyse "Açamadı" metnini gizle ve bitmeleri kapat
         acmadi.style.display="none";
         kat2.style.display="none";
       }else{
+        // sayı silinince geri getir
         acmadi.style.display="inline-block";
         kat2.style.display="block";
+        bitmeler.forEach(b=>{ b.style.display="inline-block"; });
+        okey.classList.add("hidden"); okey.classList.remove("aktif");
       }
     });
 
@@ -156,24 +169,35 @@ function aktiflestirDavranislar(){
     bitmeler.forEach(bit=>{
       bit.addEventListener("click",()=>{
         const aktifMi=bit.classList.contains("aktif");
-        bitmeler.forEach(b=>b.classList.remove("aktif"));
+
+        // Önce hepsini görünür ve pasif yap
+        bitmeler.forEach(b=>{
+          b.classList.remove("aktif");
+          b.style.display="inline-block";
+        });
+
         if(aktifMi){
-          okey.classList.add("hidden");
+          // Seçimi kaldırıyoruz → Kategori 1 geri gelsin, Okey gizlensin
           kat1.style.display="block";
+          okey.classList.add("hidden");
+          okey.classList.remove("aktif");
         }else{
+          // Bu bitme türünü seç → yalnızca bu kalsın, Kategori 1 gizlensin, Okey görünsün
           bit.classList.add("aktif");
+          bitmeler.forEach(b=>{ if(b!==bit) b.style.display="none"; });
           kat1.style.display="none";
-          bitmeler.forEach(b=>{if(b!==bit)b.style.display="none";});
           okey.classList.remove("hidden");
         }
       });
     });
+
+    // "Okey ile" toggle
     okey.addEventListener("click",()=>{
       okey.classList.toggle("aktif");
     });
   });
 
-  // 🧩 El kilitleme
+  // 🧩 El kilitleme (aynı kaldı)
   const rows=document.querySelectorAll("#skorTablo tr");
   rows.forEach((row,idx)=>{
     if(idx===0)return;
@@ -183,6 +207,7 @@ function aktiflestirDavranislar(){
     });
   });
 }
+
 
 function kilitleOnceki(satirIndex){
   const rows=document.querySelectorAll("#skorTablo tr");
