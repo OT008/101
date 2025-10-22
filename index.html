@@ -8,8 +8,8 @@
   h1{text-align:center;padding:20px;background:#4a90e2;color:white;margin:0 0 20px;}
   .container{max-width:1100px;margin:auto;background:white;border-radius:10px;
     box-shadow:0 4px 10px rgba(0,0,0,0.1);padding:20px;}
-  label{font-weight:600;}
-  input,select{padding:5px 8px;border-radius:6px;border:1px solid #ccc;}
+  label{display:block;margin-top:10px;font-weight:600;}
+  input,select{padding:5px 8px;border-radius:6px;border:1px solid #ccc;width:100%;box-sizing:border-box;}
   table{width:100%;border-collapse:collapse;margin-top:20px;}
   th,td{border:1px solid #ddd;text-align:center;vertical-align:middle;padding:8px;}
   th{background:#4a90e2;color:white;}
@@ -17,30 +17,64 @@
     cursor:pointer;margin-top:20px;font-weight:bold;}
   .btn:hover{background:#357ABD;}
   .hidden{display:none;}
-  .kategori{border:1px solid #eee;margin:2px;padding:3px;border-radius:5px;background:#f9f9f9;}
-  .kategori h4{margin:2px 0;font-size:13px;color:#4a90e2;}
-  .kategori label{font-weight:normal;margin-right:5px;}
+  .section-title{background:#e9f0ff;padding:10px;font-weight:bold;margin-top:20px;border-radius:6px;}
+  .takimBilgi{background:#f9f9f9;padding:10px;margin-top:10px;border-radius:8px;text-align:center;font-weight:600;color:#333;}
   .player-cell{font-size:13px;text-align:center;}
+  .kategori{border:1px solid #eee;margin:2px;padding:4px;border-radius:6px;background:#f9f9f9;}
+  .kategori h4{margin:2px 0;font-size:13px;color:#4a90e2;}
+  .secenek{display:inline-block;margin:4px 6px;padding:3px 6px;border-radius:5px;cursor:pointer;transition:all .2s;}
+  .secenek:hover{background:#e0edff;}
+  .secenek.aktif{background:#4a90e2;color:white;font-weight:bold;}
+  .locked input, .locked .secenek{pointer-events:none;opacity:0.6;}
   input[type="number"]{width:60px;text-align:center;}
-  .locked{opacity:0.6;pointer-events:none;}
 </style>
 </head>
 <body>
 <h1>🧮 Okey 101 Skor Takip Sistemi</h1>
 
+<!-- ⚙️ GİRİŞ SAYFASI -->
 <div class="container" id="ayarEkrani">
-  <h3>Oyun Ayarları</h3>
+  <div class="section-title">Oyun Ayarları</div>
   <label>Kaç tur oynanacak?</label>
-  <input type="number" id="turSayisi" min="1" max="50" value="10"><br><br>
-  <label>Oyuncular:</label><br>
-  <input id="oy1" value="Oyuncu 1"> 
-  <input id="oy2" value="Oyuncu 2"> 
-  <input id="oy3" value="Oyuncu 3"> 
+  <input type="number" id="turSayisi" min="1" max="50" value="10">
+
+  <label>Oyuncular:</label>
+  <input id="oy1" value="Oyuncu 1">
+  <input id="oy2" value="Oyuncu 2">
+  <input id="oy3" value="Oyuncu 3">
   <input id="oy4" value="Oyuncu 4">
-  <br><br>
+
+  <div class="section-title">Puanlama Ayarları</div>
+  <div style="display:flex;gap:10px;">
+    <div style="width:48%;">
+      <label>Açamama (+)</label><input type="number" id="p_acamama" value="202">
+      <label>Bitirme (-)</label><input type="number" id="p_bitirme" value="-101">
+      <label>Okey ile Bitirme (-)</label><input type="number" id="p_okeybit" value="-202">
+      <label>Çiftle Bitirme (-)</label><input type="number" id="p_ciftbit" value="-202">
+    </div>
+    <div style="width:48%;">
+      <label>Elden Bitirme (-)</label><input type="number" id="p_eldenbit" value="-202">
+      <label>Elden Okey ile Bitme (-)</label><input type="number" id="p_eldenokey" value="-404">
+      <label>Çiftle Okey ile Bitme (-)</label><input type="number" id="p_ciftokey" value="-404">
+      <label>Masa Sayısını Aşma (-)</label><input type="number" id="p_masaAsma" value="-101">
+    </div>
+  </div>
+
+  <div class="section-title">Ceza Puanları</div>
+  <div style="display:flex;gap:10px;">
+    <div style="width:48%;">
+      <label>İşlek Atma (+)</label><input type="number" id="c_islek" value="101">
+      <label>Okey Kaptırma (+)</label><input type="number" id="c_okeykaptir" value="101">
+    </div>
+    <div style="width:48%;">
+      <label>Hatalı Açma (+)</label><input type="number" id="c_hatali" value="101">
+    </div>
+  </div>
+
   <button class="btn" onclick="oyunaBasla()">OYUNA BAŞLA</button>
 </div>
 
+<!-- 🧮 OYUN TABLOSU -->
 <div class="container hidden" id="oyunEkrani">
   <div id="oyunBilgisi"></div>
   <table id="skorTablo"></table>
@@ -50,11 +84,10 @@
 <script>
 function oyunaBasla(){
   const turSayisi=parseInt(document.getElementById("turSayisi").value);
-  const oyuncular=[document.getElementById("oy1").value,document.getElementById("oy2").value,
-                   document.getElementById("oy3").value,document.getElementById("oy4").value];
-
+  const oyuncular=[oy1.value,oy2.value,oy3.value,oy4.value];
   document.getElementById("ayarEkrani").classList.add("hidden");
   document.getElementById("oyunEkrani").classList.remove("hidden");
+  document.getElementById("oyunBilgisi").innerHTML=`<h3>Tur Sayısı: ${turSayisi}</h3>`;
 
   let html="<tr><th>El</th>";
   oyuncular.forEach(o=>html+=`<th>${o}</th>`);
@@ -66,21 +99,19 @@ function oyunaBasla(){
       html+=`<td id='cell_${el}_${idx}' class='player-cell'>
         <div class='kategori kat1'>
           <h4>1️⃣ Açma Durumu</h4>
-          <label><input type='checkbox' class='acmadi'> Açamadı</label><br>
-          <label>Elinde: <input type='number' class='elinde' min='0' max='200' value=''></label>
+          <span class='secenek acmadi'>Açamadı</span>
+          <span>Elinde: <input type='number' class='elinde' min='0' max='200'></span>
         </div>
         <div class='kategori kat2'>
           <h4>2️⃣ Bitme Türü</h4>
-          <label><input type='checkbox' class='bitme'> Bitti</label>
-          <label><input type='checkbox' class='bitme'> Okey ile</label>
-          <label><input type='checkbox' class='bitme'> Çiftle</label><br>
-          <label><input type='checkbox' class='bitme'> Elden Bitti</label>
-          <label><input type='checkbox' class='bitme'> Elden Okey ile</label>
-          <label><input type='checkbox' class='bitme'> Çiftle Okey ile</label>
+          <span class='secenek bitme'>Bitti</span>
+          <span class='secenek bitme'>Elden Bitti</span>
+          <span class='secenek bitme'>Çiftle Bitti</span>
+          <span class='secenek okey hidden'>Okey ile</span>
         </div>
         <div class='kategori kat3'>
           <h4>3️⃣ Cezalar / Masa Aşımı</h4>
-          <label><input type='checkbox' class='masaAsti'> Masa Aştı</label><br>
+          <span class='secenek masa'>Masa Aştı</span><br>
           <label>İşlek Atma: <input type='number' class='ceza islek' min='0' value='0'></label><br>
           <label>Hatalı Açma: <input type='number' class='ceza hatali' min='0' value='0'></label><br>
           <label>Okey Kaptırma: <input type='number' class='ceza kaptir' min='0' value='0'></label>
@@ -90,77 +121,75 @@ function oyunaBasla(){
     html+="</tr>";
   }
   document.getElementById("skorTablo").innerHTML=html;
-  aktiflestirOlaylar();
+  aktiflestirDavranislar();
 }
 
-function aktiflestirOlaylar(){
-  const cells=document.querySelectorAll(".player-cell");
+function aktiflestirDavranislar(){
+  document.querySelectorAll(".player-cell").forEach(cell=>{
+    const kat1=cell.querySelector(".kat1"), kat2=cell.querySelector(".kat2"), kat3=cell.querySelector(".kat3");
+    const acmadi=kat1.querySelector(".acmadi"), elinde=kat1.querySelector(".elinde");
+    const bitmeler=kat2.querySelectorAll(".bitme"), okey=kat2.querySelector(".okey");
 
-  cells.forEach(cell=>{
-    const kat1=cell.querySelector(".kat1");
-    const kat2=cell.querySelector(".kat2");
-    const kat3=cell.querySelector(".kat3");
-    const acmadi=kat1.querySelector(".acmadi");
-    const elinde=kat1.querySelector(".elinde");
-    const bitmeler=kat2.querySelectorAll(".bitme");
-
-    // 1. Kategori davranışı
-    acmadi.addEventListener("change",()=>{
-      if(acmadi.checked || elinde.value!==""){
-        // sadece seçilen gözüksün, 2. kategori gizlensin
-        [...kat1.children].forEach(c=>{if(!c.contains(acmadi)&&!c.contains(elinde)) c.style.display="none";});
+    // 1️⃣ AÇMA
+    acmadi.addEventListener("click",()=>{
+      if(!acmadi.classList.contains("aktif")){
+        acmadi.classList.add("aktif");
+        elinde.disabled=true;
         kat2.style.display="none";
-      } else {
-        // geri getir
-        [...kat1.children].forEach(c=>c.style.display="block");
+      }else{
+        acmadi.classList.remove("aktif");
+        elinde.disabled=false;
         kat2.style.display="block";
       }
     });
     elinde.addEventListener("input",()=>{
       if(elinde.value!==""){
-        kat1.querySelector(".acmadi").style.display="none";
+        acmadi.style.display="none";
         kat2.style.display="none";
-      } else {
-        kat1.querySelector(".acmadi").style.display="inline-block";
+      }else{
+        acmadi.style.display="inline-block";
         kat2.style.display="block";
       }
     });
 
-    // 2. Kategori davranışı
+    // 2️⃣ BİTME TÜRLERİ
     bitmeler.forEach(bit=>{
-      bit.addEventListener("change",()=>{
-        if(bit.checked){
-          bitmeler.forEach(b=>{if(b!==bit) b.parentElement.style.display="none";});
-          kat1.style.display="none";
-        } else {
-          bitmeler.forEach(b=>b.parentElement.style.display="inline-block");
+      bit.addEventListener("click",()=>{
+        const aktifMi=bit.classList.contains("aktif");
+        bitmeler.forEach(b=>b.classList.remove("aktif"));
+        if(aktifMi){
+          okey.classList.add("hidden");
           kat1.style.display="block";
+        }else{
+          bit.classList.add("aktif");
+          kat1.style.display="none";
+          bitmeler.forEach(b=>{if(b!==bit)b.style.display="none";});
+          okey.classList.remove("hidden");
         }
       });
     });
+    okey.addEventListener("click",()=>{
+      okey.classList.toggle("aktif");
+    });
   });
 
-  // el kilitleme kontrolü
+  // 🧩 El kilitleme
   const rows=document.querySelectorAll("#skorTablo tr");
   rows.forEach((row,idx)=>{
     if(idx===0)return;
-    const inputs=row.querySelectorAll("input");
-    inputs.forEach(inp=>{
-      inp.addEventListener("change",()=>kilitKontrol(idx));
+    row.querySelectorAll("input, .secenek").forEach(el=>{
+      el.addEventListener("input",()=>kilitleOnceki(idx));
+      el.addEventListener("click",()=>kilitleOnceki(idx));
     });
   });
 }
 
-function kilitKontrol(currentRow){
+function kilitleOnceki(satirIndex){
   const rows=document.querySelectorAll("#skorTablo tr");
-  // currentRow satırında işlem olunca, bir önceki satırı kilitle
-  if(currentRow>1){
-    const prevRow=rows[currentRow-1];
-    if(prevRow && !prevRow.classList.contains("lockedRow")){
-      prevRow.classList.add("lockedRow");
-      prevRow.querySelectorAll("input,select").forEach(i=>{
-        i.disabled=true;
-      });
+  if(satirIndex>1){
+    const onceki=rows[satirIndex-1];
+    if(!onceki.classList.contains("locked")){
+      onceki.classList.add("locked");
     }
   }
 }
