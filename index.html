@@ -27,9 +27,18 @@
   .locked input, .locked .secenek, .locked button{pointer-events:none;opacity:0.6;}
   input[type="number"]{width:60px;text-align:center;}
   .ceza-satiri{margin:3px 0;}
-  .ceza-satiri button{width:25px;height:25px;border:none;border-radius:4px;cursor:pointer;
-    background:#4a90e2;color:white;font-weight:bold;}
-  .ceza-satiri button:hover{background:#357ABD;}
+  .ceza-satiri button{
+    width:25px;height:25px;border:none;border-radius:4px;cursor:pointer;
+    color:white;font-weight:bold;font-size:14px;
+  }
+  .ceza-satiri .azalt{
+    background:#e74c3c; /* kırmızı */
+  }
+  .ceza-satiri .azalt:hover{background:#c0392b;}
+  .ceza-satiri .artir{
+    background:#2ecc71; /* yeşil */
+  }
+  .ceza-satiri .artir:hover{background:#27ae60;}
 </style>
 </head>
 <body>
@@ -143,8 +152,9 @@ function aktiflestirDavranislar(){
     const kat1=cell.querySelector(".kat1"), kat2=cell.querySelector(".kat2");
     const acmadi=kat1.querySelector(".acmadi"), elinde=kat1.querySelector(".elinde");
     const bitmeler=kat2.querySelectorAll(".bitme");
+    const masaBtn=cell.querySelector(".masa");
 
-    // AÇMA DURUMU
+    // 1️⃣ AÇMA
     acmadi.addEventListener("click",()=>{
       if(!acmadi.classList.contains("aktif")){
         acmadi.classList.add("aktif");
@@ -166,7 +176,7 @@ function aktiflestirDavranislar(){
       }
     });
 
-    // BİTME TÜRLERİ
+    // 2️⃣ BİTME
     bitmeler.forEach(bit=>{
       bit.addEventListener("click",()=>{
         const aktifMi=bit.classList.contains("aktif");
@@ -182,7 +192,12 @@ function aktiflestirDavranislar(){
       });
     });
 
-    // CEZALAR (+ / -)
+    // 3️⃣ MASA AŞTI
+    masaBtn.addEventListener("click",()=>{
+      masaBtn.classList.toggle("aktif");
+    });
+
+    // 4️⃣ CEZA (+ / -)
     const cezaSatirlari=cell.querySelectorAll(".ceza-satiri");
     cezaSatirlari.forEach(row=>{
       const azalt=row.querySelector(".azalt");
@@ -199,7 +214,7 @@ function aktiflestirDavranislar(){
     });
   });
 
-  // EL KİLİTLEME
+  // 🧩 EL KİLİTLEME
   const rows=document.querySelectorAll("#skorTablo tr");
   rows.forEach((row,idx)=>{
     if(idx===0)return;
