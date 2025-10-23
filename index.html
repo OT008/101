@@ -169,8 +169,8 @@ function oyunaBasla(){
     });
     html+="</tr>";
   }
-  document.getElementById("skorTablo").innerHTML=html;
-  aktiflestir(tur,tip,takimlar);
+  document.getElementById("skorTablo").innerHTML = html;
+  setTimeout(()=>aktiflestir(tur,tip,takimlar),100);
 }
 
 // === TABLO DAVRANIŞLARI ===
