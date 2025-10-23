@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>Okey 101 Skor Takip Sistemi (Temel Sürüm)</title>
+<title>Okey 101 Skor Takip Sistemi (Tablo Aktif Sürüm)</title>
 <style>
 body{font-family:"Segoe UI",sans-serif;background:#f3f6fb;color:#2c3e50;margin:0}
 h1{text-align:center;padding:20px;background:#4a90e2;color:#fff;margin:0 0 20px}
@@ -36,16 +36,14 @@ input[type="number"]{width:70px;text-align:center}
 <body>
 <h1>🧮 Okey 101 Skor Takip Sistemi</h1>
 
-<!-- 🎮 GİRİŞ EKRANI -->
+<!-- 🎮 GİRİŞ EKRANI (DEĞİŞMEDİ) -->
 <div class="container" id="ayarEkrani">
   <div class="section-title">Oyun Ayarları</div>
-
   <label>Oyun Türü:</label>
   <select id="oyunTuru" onchange="oyunTuruDegisti()">
     <option value="tek">Tekli</option>
     <option value="esli">Eşli</option>
   </select>
-
   <div id="esliSecenekleri" class="hidden">
     <label>Eşli Oyun Tipi:</label>
     <select id="esliTipi" onchange="oyunTuruDegisti()">
@@ -53,13 +51,10 @@ input[type="number"]{width:70px;text-align:center}
       <option value="ayri">Ayrı Ayrı (Bireysel puan)</option>
     </select>
   </div>
-
   <label>Kaç tur oynanacak?</label>
   <input type="number" id="turSayisi" min="1" max="50" value="10">
-
   <div class="section-title">Oyuncular / Takımlar</div>
   <div id="isimler"></div>
-
   <div class="section-title">Puanlama Ayarları</div>
   <div style="display:flex;gap:10px;">
     <div style="width:48%;">
@@ -75,7 +70,6 @@ input[type="number"]{width:70px;text-align:center}
       <label>Masa Aştı (-)</label><input type="number" id="p_masaAsma" value="-101">
     </div>
   </div>
-
   <div class="section-title">Ceza Puanları</div>
   <div style="display:flex;gap:10px;">
     <div style="width:48%;">
@@ -86,7 +80,6 @@ input[type="number"]{width:70px;text-align:center}
       <label>Hatalı Açma (+)</label><input type="number" id="c_hatali" value="101">
     </div>
   </div>
-
   <button class="btn" onclick="oyunaBasla()">OYUNA BAŞLA</button>
 </div>
 
@@ -98,6 +91,7 @@ input[type="number"]{width:70px;text-align:center}
 </div>
 
 <script>
+// === GİRİŞ ===
 function oyunTuruDegisti(){
   const tur=document.getElementById("oyunTuru").value;
   const tip=document.getElementById("esliTipi")?document.getElementById("esliTipi").value:"birlikte";
@@ -120,6 +114,7 @@ function oyunTuruDegisti(){
 }
 oyunTuruDegisti();
 
+// === OYUN BAŞLAT ===
 function oyunaBasla(){
   const tur=document.getElementById("oyunTuru").value;
   const tip=document.getElementById("esliTipi")?document.getElementById("esliTipi").value:"birlikte";
@@ -175,7 +170,94 @@ function oyunaBasla(){
     html+="</tr>";
   }
   document.getElementById("skorTablo").innerHTML=html;
+  aktiflestir(tur,tip,takimlar);
 }
+
+// === TABLO DAVRANIŞLARI ===
+function aktiflestir(tur,tip,takimlar){
+  document.querySelectorAll(".player-cell").forEach(cell=>{
+    const acmadi=cell.querySelector(".acmadi");
+    const elinde=cell.querySelector(".elinde");
+    const kat1=cell.querySelector(".kat1");
+    const kat2=cell.querySelector(".kat2");
+    const bitmeler=kat2.querySelectorAll(".bitme");
+    const okey=kat2.querySelector(".okey");
+    const masaBtn=cell.querySelector(".masa");
+
+    // Açamadı & Elinde
+    acmadi.onclick=()=>{acmadi.classList.toggle("aktif");elinde.disabled=acmadi.classList.contains("aktif");kat2.style.display=acmadi.classList.contains("aktif")?"none":"block";}
+    elinde.oninput=()=>{if(elinde.value!==""){acmadi.style.display="none";kat2.style.display="none";}else{acmadi.style.display="inline-block";kat2.style.display="block";}}
+
+    // Bitmeler
+    bitmeler.forEach(bit=>bit.onclick=()=>{
+      const aktif=bit.classList.contains("aktif");
+      bitmeler.forEach(b=>{b.classList.remove("aktif");b.style.display="inline-block";});
+      okey.classList.add("hidden");okey.classList.remove("aktif");
+      if(!aktif){
+        bit.classList.add("aktif");
+        bitmeler.forEach(b=>{if(b!==bit)b.style.display="none";});
+        kat1.style.display="none";
+        okey.classList.remove("hidden");
+        if(tur==="esli"&&tip==="ayri")takimEtkisi(cell,takimlar);
+      } else {kat1.style.display="block";}
+    });
+    okey.onclick=()=>okey.classList.toggle("aktif");
+
+    // Masa Aştı
+    masaBtn.onclick=()=>masaBtn.classList.toggle("aktif");
+
+    // Cezalar
+    cell.querySelectorAll(".ceza-satiri").forEach(r=>{
+      const val=r.querySelector(".deger");
+      r.querySelector(".azalt").onclick=()=>{let v=parseInt(val.textContent);if(v>0)val.textContent=v-1;}
+      r.querySelector(".artir").onclick=()=>{let v=parseInt(val.textContent);val.textContent=v+1;}
+    });
+  });
+
+  // Akıllı kilit
+  const rows=document.querySelectorAll("#skorTablo tr");
+  rows.forEach((r,i)=>{if(i===0)return;r.querySelectorAll("input,.secenek,button").forEach(el=>{
+    el.oninput=()=>kilitKontrol(i);
+    el.onclick=()=>kilitKontrol(i);
+  });});
+}
+
+function takimEtkisi(cell,takimlar){
+  const el=cell.dataset.el;
+  const idx=parseInt(cell.dataset.oy);
+  let partner=null;
+  takimlar.forEach(t=>{if(t.includes(idx))partner=t.find(p=>p!==idx);});
+  if(partner===null)return;
+  const partnerCell=document.querySelector(`.player-cell[data-el='${el}'][data-oy='${partner}']`);
+  if(!partnerCell)return;
+  // partner sadece cezalara dokunabilsin
+  partnerCell.querySelectorAll(".kat1,.kat2").forEach(k=>k.style.display="none");
+  partnerCell.querySelectorAll(".bitme,.okey").forEach(b=>b.classList.remove("aktif"));
+}
+
+function kilitKontrol(i){
+  const rows=document.querySelectorAll("#skorTablo tr");
+  if(i<=1)return;
+  const prev=rows[i-1],cur=rows[i];
+  const has=rowHasData(cur);
+  if(has&&!prev.classList.contains("locked")){
+    prev.classList.add("locked");
+    prev.querySelectorAll("input,.secenek,button").forEach(e=>e.disabled=true);
+  } else if(!has&&prev.classList.contains("locked")){
+    prev.classList.remove("locked");
+    prev.querySelectorAll("input,.secenek,button").forEach(e=>e.disabled=false);
+  }
+}
+
+function rowHasData(row){
+  if(row.querySelector(".secenek.aktif"))return true;
+  const v=row.querySelectorAll(".deger");
+  for(const a of v) if(parseInt(a.textContent)>0)return true;
+  const n=row.querySelectorAll("input[type='number']");
+  for(const x of n) if(x.value!=="")return true;
+  return false;
+}
+
 function yeniOyun(){
   document.getElementById("oyunEkrani").classList.add("hidden");
   document.getElementById("ayarEkrani").classList.remove("hidden");
