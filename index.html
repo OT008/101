@@ -192,7 +192,6 @@ th {
   background: #e9f0ff;
   padding: 10px;
   font-weight: bold;
-  margin-top: 20px;
   border-radius: 6px;
   font-size: 15px;
   color: #2c3e50;
@@ -251,7 +250,7 @@ input[type=number] {
   </div>
   <div style="width:50%;">
     <label>Oynanacak Tur Sayısı</label>
-    <input type="number" id="tur" min="3" max="33" value="11">
+    <input type="number" id="tur" min="3" max="33" value="3">
   </div>
 </div>
   <div id="esliSecenekleri" class="hidden">
@@ -266,16 +265,14 @@ input[type=number] {
 	<div class="section-title">Oyun Puanlama</div>
 	<div style="display:flex;gap:0px;">
       <div style="width:50%;">
-	    <label>Açamama (+)</label><input type="number" id="p_acamama" value="202">
+	    
 	    <label>Bitirme (-)</label><input type="number" id="p_bitirme" value="-101">
 	    <label>Elden Bitirme (-)</label><input type="number" id="p_eldenbit" value="-202">		
 	    <label>Çiftle Bitirme (-)</label><input type="number" id="p_ciftbit" value="-202">
       </div>
       <div style="width:50%;">
-	    <label>Okey ile Bitirme (-)</label><input type="number" id="p_okeybit" value="-202">
-	    <label>Elden Okey ile Bitirme (-)</label><input type="number" id="p_eldenokey" value="-404">
-	    <label>Çiftle Okey ile Bitirme (-)</label><input type="number" id="p_ciftokey" value="-404">
-	    <label>Masa Sayısını Aşma (-)</label><input type="number" id="p_masaAsma" value="-101">
+	    <label>Açamama (+)</label><input type="number" id="p_acamama" value="202">
+		<label>Masa Sayısını Aşma (-)</label><input type="number" id="p_masaAsma" value="-101">
       </div>
     </div>
   <div class="section-title">Ceza Puanlaması</div>
@@ -299,239 +296,378 @@ input[type=number] {
 </div>
 
 <script>
+//---------------------------------------------------------------------------------------
 function oyunTuruDegisti(){
-  const tur=document.getElementById("oyunTuru").value;
-  const tip=document.getElementById("esliTipi")?document.getElementById("esliTipi").value:"birlikte";
-  const esliSecenekleri=document.getElementById("esliSecenekleri");
-  const isimler=document.getElementById("isimler");
-  if(tur==="esli") esliSecenekleri.classList.remove("hidden");
-  else esliSecenekleri.classList.add("hidden");
-
-  if(tur==="tek"||(tur==="esli"&&tip==="ayri")){
-isimler.innerHTML=`
-  <div class="oyuncu-grup">
-    <div><label>Oyuncu 1:</label><input id="oy1" value="Oyuncu 1"></div>
-    <div><label>Oyuncu 2:</label><input id="oy2" value="Oyuncu 2"></div>
-    <div><label>Oyuncu 3:</label><input id="oy3" value="Oyuncu 3"></div>
-    <div><label>Oyuncu 4:</label><input id="oy4" value="Oyuncu 4"></div>
-  </div>`;
-  } else {
-    isimler.innerHTML=`
-      <label>Takım 1:</label><input id="oy1" value="Takım 1">
-      <label>Takım 2:</label><input id="oy3" value="Takım 2">`;
-  }
+	const tur=document.getElementById("oyunTuru").value;
+	const tip=document.getElementById("esliTipi")
+		?document.getElementById("esliTipi").value
+		:"birlikte";
+	const esliSecenekleri=document.getElementById("esliSecenekleri");
+	const isimler=document.getElementById("isimler");
+	if(tur==="esli") {
+		esliSecenekleri.classList.remove("hidden");
+	} else {
+		esliSecenekleri.classList.add("hidden");
+	}
+	if(tur==="tek"||(tur==="esli"&&tip==="ayri")){
+		isimler.innerHTML=`
+			<div class="oyuncu-grup">
+				<div><label>Oyuncu 1:</label><input id="oy1" value="Oyuncu 1"></div>
+				<div><label>Oyuncu 2:</label><input id="oy2" value="Oyuncu 2"></div>
+				<div><label>Oyuncu 3:</label><input id="oy3" value="Oyuncu 3"></div>
+				<div><label>Oyuncu 4:</label><input id="oy4" value="Oyuncu 4"></div>
+			</div>`;
+	} else {
+		isimler.innerHTML=`
+			<label>Takım 1:</label><input id="oy1" value="Takım 1">
+			<label>Takım 2:</label><input id="oy3" value="Takım 2">`;
+	}
 }
 oyunTuruDegisti();
 
 function oyunaBasla(){
-  const turSayisi = parseInt(document.getElementById("tur").value);
-  const oyuncular = Array.from(document.querySelectorAll("#isimler input")).map(i => i.value);
-  const oyunTuru = document.getElementById("oyunTuru").value;
-  const esliTipi = document.getElementById("esliTipi") ? document.getElementById("esliTipi").value : "birlikte";
-  const esliAyrı = (oyunTuru === "esli" && esliTipi === "ayri");
-  window.esliAyrı = esliAyrı;
-  document.getElementById("ayarEkrani").classList.add("hidden");
-  document.getElementById("oyunEkrani").classList.remove("hidden");
-  document.getElementById("oyunBilgisi").innerHTML=`<h3>Tur Sayısı: ${turSayisi}</h3>`;
+	const turSayisi = parseInt(document.getElementById("tur").value);
+	const oyuncular = Array.from(document.querySelectorAll("#isimler input")).map(i => i.value);
+	const oyunTuru = document.getElementById("oyunTuru").value;
+	const esliTipi = document.getElementById("esliTipi")? document.getElementById("esliTipi").value: "birlikte";
+	const esliAyrı = (oyunTuru === "esli" && esliTipi === "ayri");
+	window.esliAyrı = esliAyrı;
+	document.getElementById("ayarEkrani").classList.add("hidden");
+	document.getElementById("oyunEkrani").classList.remove("hidden");
+	let oyunBilgiMetni = "";
+	if (oyunTuru === "tek") {
+		oyunBilgiMetni = "Tekli";
+	} else {
+		// Eşli ise tipine göre yaz
+		if (esliTipi === "birlikte") {
+			oyunBilgiMetni = "Eşli (Beraber)";
+		} else {
+			oyunBilgiMetni = "Eşli (Ayrı Ayrı)";
+		}
+	}
+	document.getElementById("oyunBilgisi").innerHTML = `<h3>${oyunBilgiMetni} ${turSayisi} tur</h3>`;
 
-  let html="<tr><th>El</th>";
-  oyuncular.forEach(o=>html+=`<th>${o}</th>`);
-  html+="</tr>";
-
-  for(let el=1;el<=turSayisi;el++){
-    html+=`<tr><td><b>${el}</b></td>`;
-    oyuncular.forEach((o,idx)=>{
-      html+=`<td id='cell_${el}_${idx}' class='player-cell'>
-        <div class='kategori kat1'>
-          <h4>Açma Durumu</h4>
-          <span class='secenek acmadi'>Açamadı</span>
-          <span>Elinde: <input type='number' class='elinde' min='0' max='200'></span>
-        </div>
-        <div class='kategori kat2'>
-          <h4>Bitme Türü</h4>
-          <span class='secenek bitme'>Bitti</span>
-          <span class='secenek bitme'>Elden Bitti</span>
-          <span class='secenek bitme'>Çiftle Bitti</span>
-          <span class='secenek okey hidden'>Okey ile</span>
-        </div>
-        <div class='kategori kat3'>
-          <h4>Cezalar / Masa Aşımı</h4>
-          <span class='secenek masa'>Masa Aştı</span>
-          <div class='ceza-satiri'>İşlek Atma:
-            <button class='azalt'>-</button>
-            <span class='deger islek'>0</span>
-            <button class='artir'>+</button>
-          </div>
-          <div class='ceza-satiri'>Hatalı Açma:
-            <button class='azalt'>-</button>
-            <span class='deger hatali'>0</span>
-            <button class='artir'>+</button>
-          </div>
-          <div class='ceza-satiri'>Okey Kaptırma:
-            <button class='azalt'>-</button>
-            <span class='deger kaptir'>0</span>
-            <button class='artir'>+</button>
-          </div>
-        </div>
-      </td>`;
-    });
-    html+="</tr>";
-  }
-  document.getElementById("skorTablo").innerHTML=html;
-  aktiflestirDavranislar();
+	let html="<tr><th>El</th>";
+	oyuncular.forEach(o=>html+=`<th>${o}</th>`);
+	html+="</tr>";
+	for(let el=1;el<=turSayisi;el++){
+		html+=`<tr><td><b>${el}</b></td>`;
+		oyuncular.forEach((o,idx)=>{
+			html+=`<td id='cell_${el}_${idx}' class='player-cell'>
+				<div class='kategori kat1'>
+				  <h4>Açma Durumu</h4>
+				  <span class='secenek acmadi'>Açamadı</span>
+				  <span>Elinde: <input type='number' class='elinde' min='0' max='200'></span>
+				</div>
+				<div class='kategori kat2'>
+				  <h4>Bitme Türü</h4>
+				  <span class='secenek bitme'>Bitti</span>
+				  <span class='secenek bitme'>Elden Bitti</span>
+				  <span class='secenek bitme'>Çiftle Bitti</span>
+				  <span class='secenek okey hidden'>Okey ile</span>
+				</div>
+				<div class='kategori kat3'>
+				  <h4>Masa Aşımı / Cezalar</h4>
+				  <span class='secenek masa'>Masa Aştı</span>
+				  <div class='ceza-satiri'>İşlek Atma:
+					<button class='azalt'>-</button>
+					<span class='deger islek'>0</span>
+					<button class='artir'>+</button>
+				  </div>
+				  <div class='ceza-satiri'>Hatalı Açma:
+					<button class='azalt'>-</button>
+					<span class='deger hatali'>0</span>
+					<button class='artir'>+</button>
+				  </div>
+				  <div class='ceza-satiri'>Okey Kaptırma:
+					<button class='azalt'>-</button>
+					<span class='deger kaptir'>0</span>
+					<button class='artir'>+</button>
+				  </div>
+				</div>
+			  </td>`;
+		});
+		html+="</tr>";
+	}
+	document.getElementById("skorTablo").innerHTML=html;
+	aktiflestirDavranislar();
 }
 
 function aktiflestirDavranislar(){
-  document.querySelectorAll(".player-cell").forEach(cell=>{
-    const kat1=cell.querySelector(".kat1"), kat2=cell.querySelector(".kat2");
-    const acmadi=kat1.querySelector(".acmadi"), elinde=kat1.querySelector(".elinde");
-    const bitmeler=kat2.querySelectorAll(".bitme");
-    const okey=kat2.querySelector(".okey");
-    const masaBtn=cell.querySelector(".masa");
-
-    acmadi.addEventListener("click",()=>{
-      if(!acmadi.classList.contains("aktif")){
-        acmadi.classList.add("aktif");
-        elinde.disabled=true;
-		elinde.parentElement.style.display = "none";
-        kat2.style.display="none";
-      }else{
-        acmadi.classList.remove("aktif");
-        elinde.disabled=false;
-		elinde.parentElement.style.display = "inline-block";
-        kat2.style.display="block";
-      }
-    });
-    elinde.addEventListener("input",()=>{
-      if(elinde.value!==""){
-        acmadi.style.display="none";
-        kat2.style.display="none";
-      }else{
-        acmadi.style.display="inline-block";
-        kat2.style.display="block";
-      }
-    });
-
-	bitmeler.forEach(bit=>{
-	  bit.addEventListener("click",()=>{
-	  const aktifMi = bit.classList.contains("aktif");
-      bitmeler.forEach(b=>{b.classList.remove("aktif");b.style.display="inline-block";});
-
-      if(aktifMi){
-		kat1.style.display="block";
-		okey.classList.add("hidden");
-		okey.classList.remove("aktif");
-		
-		if(window.esliAyrı){
-		  const id = cell.id;
-		  const parca = id.split("_");
-          const idx = parseInt(parca[2]);
-          const takimEs = (idx % 2 === 0) ? idx + 1 : idx - 1;
-		  const takimCell = document.getElementById(`cell_${parca[1]}_${takimEs}`);
-		  if(takimCell){
-		    takimCell.querySelector(".kat1").style.display = "block";
-			takimCell.querySelector(".kat2").style.display = "block";
-		  }
-		}
-	  } else {
-		bit.classList.add("aktif");
-		kat1.style.display="none";
-		bitmeler.forEach(b=>{if(b!==bit)b.style.display="none";});
-		
-		okey.classList.remove("hidden");
-
-      // 🟢 EŞLİ BİRLİKTE MODU: Takım arkadaşı işlemi
-      if(window.esliAyrı){
-        const id = cell.id; 
-        const parca = id.split("_");
-        const idx = parseInt(parca[2]); 
-        const takimEs = (idx % 2 === 0) ? idx + 1 : idx - 1;
-        const takimCell = document.getElementById(`cell_${parca[1]}_${takimEs}`);
-        if(takimCell){
-          const elinde = takimCell.querySelector(".elinde");
-          const acmadi = takimCell.querySelector(".acmadi");
-          const bitmeler2 = takimCell.querySelectorAll(".bitme");
-          elinde.value = "";
-          acmadi.classList.remove("aktif");
-          acmadi.style.display = "inline-block";
-          bitmeler2.forEach(b=>{b.classList.remove("aktif"); b.style.display="inline-block";});
-          takimCell.querySelector(".kat2").style.display="block";
-          takimCell.querySelector(".kat1").style.display="none";
-          takimCell.querySelector(".kat2").style.display="none";
+	document.querySelectorAll(".player-cell").forEach(cell=>{
+		const kat1=cell.querySelector(".kat1"), kat2=cell.querySelector(".kat2");
+		const acmadi=kat1.querySelector(".acmadi"), elinde=kat1.querySelector(".elinde");
+		const bitmeler=kat2.querySelectorAll(".bitme");
+		const okey=kat2.querySelector(".okey");
+		const masaBtn=cell.querySelector(".masa");
+		acmadi.addEventListener("click",()=>{
+			const bitmisVar = biriBittiMi();
+			if(!acmadi.classList.contains("aktif")){
+				acmadi.classList.add("aktif");
+				elinde.value = "";
+				elinde.disabled = true;
+				elinde.parentElement.style.display = "none";
+				// sadece kat2’yi gizle, diğer işlemleri durdurma
+				if (!bitmisVar) kat2.style.display = "none";
+			} else {
+				acmadi.classList.remove("aktif");
+				elinde.disabled = false;
+				elinde.parentElement.style.display = "inline-block";
+				// sadece kat2’yi göster, bitmiş varsa dokunma
+				if (!bitmisVar) kat2.style.display = "block";
 			}
-		  }
+		});
+		
+		elinde.addEventListener("input",()=>{
+			const val = elinde.value.trim();
+			const bitmisVar = biriBittiMi();
+			if(val !== "" && parseInt(val) > 0){
+				acmadi.style.display = "none";
+				if (!bitmisVar) kat2.style.display = "none";
+			} else {
+				acmadi.style.display = "inline-block";
+				if (!bitmisVar) kat2.style.display = "block";
+			}
+		});
+
+		bitmeler.forEach(bit=>{
+			bit.addEventListener("click",()=>{
+				const aktifMi = bit.classList.contains("aktif");
+				bitmeler.forEach(b => {
+					b.classList.remove("aktif"); 
+					b.style.display = "inline-block"; 
+				});
+				
+				const row = cell.parentElement; // <tr>
+				const otherCells = row.querySelectorAll(".player-cell"); 
+				if(aktifMi){
+					kat1.style.display="block";
+					okey.classList.add("hidden");
+					okey.classList.remove("aktif");
+					otherCells.forEach(c=>{
+						const k1 = c.querySelector(".kat1");
+						const k2 = c.querySelector(".kat2");
+						const acmadiBtn = c.querySelector(".acmadi");
+						const elindeInput = c.querySelector(".elinde");
+						const acamadiAktif = acmadiBtn.classList.contains("aktif");
+						const elindeVal = elindeInput.value;
+						// kat1 her zaman görünür
+						if (k1) k1.style.display = "block";
+						// 🔹 kat2 görünürlük mantığı
+						if (k2) {
+							if (!acamadiAktif && elindeVal === "") {
+								k2.style.display = "block";
+							} else {
+								k2.style.display = "none";
+							}
+						}
+						// 🔹 "Açamadı" butonunun durumu
+						if (acamadiAktif) {
+							acmadiBtn.style.display = "inline-block";
+						} else if (elindeVal === "") {
+							acmadiBtn.style.display = "inline-block";
+						} else {
+							acmadiBtn.style.display = "none";
+						}
+						// Bitme butonlarını yeniden göster
+						c.querySelectorAll(".bitme").forEach(b => b.style.display = "inline-block");
+					});
+					
+					if(window.esliAyrı){
+						const id = cell.id;
+						const parca = id.split("_");
+						const idx = parseInt(parca[2]);
+						const takimEs = (idx % 2 === 0) ? idx + 1 : idx - 1;
+						const takimCell = document.getElementById(`cell_${parca[1]}_${takimEs}`);
+						if(takimCell){
+							takimCell.querySelector(".kat1").style.display = "block";
+							takimCell.querySelector(".kat2").style.display = "block";
+						}
+					}
+				} else {
+					bit.classList.add("aktif");
+					kat1.style.display="none";
+					const elInput = cell.querySelector(".elinde");
+					if (elInput) elInput.value = "";
+					bitmeler.forEach(b=>{if(b!==bit)b.style.display="none";});
+					okey.classList.remove("hidden");
+					otherCells.forEach(c=>{
+						if(c === cell) return; // kendi hücremi atla
+						// diğer hücrelerde bitme seçeneklerini gizle ve varsa aktiflerini temizle
+						c.querySelectorAll(".bitme").forEach(b=>{
+							b.classList.remove("aktif");
+							b.style.display = "none";
+						});
+
+						const acmadiOther = c.querySelector(".acmadi");
+						const elindeOther = c.querySelector(".elinde");
+						// Eğer oyuncu zaten "Açamadı" durumundaysa, dokunma veya Oyuncu açamadı seçili değilse: (görünür kalsın)
+						if (acmadiOther.classList.contains("aktif")) {
+							acmadiOther.style.display = "inline-block";
+						} else {
+							// Elinde değeri boşsa gösterebilirsin veya Elinde değeri varsa gizle
+							if (elindeOther.value === "") {
+								acmadiOther.style.display = "inline-block";
+							} else {
+								acmadiOther.style.display = "none";
+							}
+						}
+							// diğer hücrelerde el bilgilerini sıfırla / açma durumunu geri getir
+							if (window.esliAyrı){
+								const elindeOther = c.querySelector(".elinde");
+								if (elindeOther) elindeOther.value = "";
+							}
+						const k2Other = c.querySelector(".kat2");
+						if(k2Other) k2Other.style.display = "none"; // rakiplerin bitme alanını gizle
+					});
+					
+					// 🟢 EŞLİ BİRLİKTE MODU: Takım arkadaşı işlemi
+					if(window.esliAyrı){
+						const id = cell.id; 
+						const parca = id.split("_");
+						const idx = parseInt(parca[2]); 
+						const takimEs = (idx % 2 === 0) ? idx + 1 : idx - 1;
+						const takimCell = document.getElementById(`cell_${parca[1]}_${takimEs}`);
+						if(takimCell){
+							const elinde = takimCell.querySelector(".elinde");
+							const acmadi = takimCell.querySelector(".acmadi");
+							const bitmeler2 = takimCell.querySelectorAll(".bitme");
+							if(elinde) elinde.value = "";
+							acmadi.classList.remove("aktif");
+							acmadi.style.display = "inline-block";
+							bitmeler2.forEach(b=>{b.classList.remove("aktif"); b.style.display="inline-block";});
+							//takimCell.querySelector(".kat2").style.display="block";
+							takimCell.querySelector(".kat1").style.display="none";
+							takimCell.querySelector(".kat2").style.display="none";
+						}
+					}
+				}
+			});
+		});
+		
+		okey.addEventListener("click",()=>{okey.classList.toggle("aktif");});
+		masaBtn.addEventListener("click",()=>{masaBtn.classList.toggle("aktif");});
+
+		const cezaSatirlari=cell.querySelectorAll(".ceza-satiri");
+		cezaSatirlari.forEach(row=>{
+			const azalt=row.querySelector(".azalt");
+			const artir=row.querySelector(".artir");
+			const deger=row.querySelector(".deger");
+			azalt.addEventListener("click",()=>{
+				let val=parseInt(deger.textContent);
+				if(val>0)deger.textContent=val-1;
+			});
+			
+			artir.addEventListener("click",()=>{
+				let val=parseInt(deger.textContent);
+				deger.textContent=val+1;
+			});
+			
+		});
+		
+	});
+
+	const rows=document.querySelectorAll("#skorTablo tr");
+	rows.forEach((r,i)=>{
+		if(i===0)return;
+		r.querySelectorAll("input,.secenek,button").forEach(el=>{
+			el.oninput=()=>kilitleOnceki(i);
+			el.onclick=()=>kilitleOnceki(i);
+		});
+		
+	});
+	
+}
+
+function biriBittiMi(){
+	return document.querySelectorAll(".bitme.aktif").length > 0;
+}
+
+function kilitleOnceki(satirIndex) {
+	const rows = document.querySelectorAll("#skorTablo tr");
+	if (satirIndex > 1) {
+		const prev = rows[satirIndex - 1];
+		const current = rows[satirIndex];
+		const currentInputs = current.querySelectorAll("input, .secenek.aktif, .deger");
+		const currentHasValue = [...currentInputs].some(el => {
+			if (el.classList && el.classList.contains("deger")) return parseInt(el.textContent) > 0;
+			if (el.tagName === "INPUT" && el.type === "number") return el.value !== "";
+			return el.classList && el.classList.contains("aktif");
+		});
+
+		if (currentHasValue) {
+			// 🔒 Önceki eli kilitle
+			if (!prev.classList.contains("locked")) {
+				prev.classList.add("locked");
+				prev.querySelectorAll("input, .secenek, button").forEach(e => {
+					e.disabled = true;
+					e.style.pointerEvents = "none";
+					e.style.opacity = "0.6";
+					e.style.cursor = "not-allowed";
+				});
+
+				// Gri yap
+				prev.querySelectorAll(".secenek.aktif").forEach(btn => {
+					btn.style.backgroundColor = "#aaa";
+					btn.style.color = "#fff";
+				});
+
+				prev.querySelectorAll(".elinde").forEach(inp => {
+					const parent = inp.parentElement;
+					inp.style.backgroundColor = "#ddd";
+					inp.style.color = "#666";
+					inp.style.borderColor = "#bbb";
+					if (parent) parent.style.color = "#999";
+				});
+
+				prev.querySelectorAll(".ceza-satiri").forEach(row => {
+					row.style.opacity = "0.6";
+					row.querySelectorAll("button").forEach(btn => {
+						btn.style.backgroundColor = "#bbb";
+						btn.style.color = "#eee";
+					});
+				});
+			}
+		} else {
+			// 🔓 Kilidi kaldır
+			if (prev.classList.contains("locked")) {
+				prev.classList.remove("locked");
+
+				prev.querySelectorAll("input, .secenek, button").forEach(e => {
+					e.disabled = false;
+					e.style.pointerEvents = "";
+					e.style.opacity = "";
+					e.style.cursor = "";
+				});
+
+				// 🎨 Görseli tamamen sıfırla (aktif buton dahil)
+				prev.querySelectorAll(".secenek").forEach(btn => {
+					btn.style.backgroundColor = "";
+					btn.style.color = "";
+				});
+
+				prev.querySelectorAll(".elinde").forEach(inp => {
+					const parent = inp.parentElement;
+					inp.style.backgroundColor = "#fff";
+					inp.style.color = "";
+					inp.style.borderColor = "#ccc";
+					if (parent) parent.style.color = "";
+				});
+
+				prev.querySelectorAll(".ceza-satiri").forEach(row => {
+					row.style.opacity = "";
+					row.querySelectorAll("button").forEach(btn => {
+						btn.style.backgroundColor = "";
+						btn.style.color = "";
+					});
+				});
+			}
 		}
-      });
-    });
-    okey.addEventListener("click",()=>{okey.classList.toggle("aktif");});
-    masaBtn.addEventListener("click",()=>{masaBtn.classList.toggle("aktif");});
-
-    const cezaSatirlari=cell.querySelectorAll(".ceza-satiri");
-    cezaSatirlari.forEach(row=>{
-      const azalt=row.querySelector(".azalt");
-      const artir=row.querySelector(".artir");
-      const deger=row.querySelector(".deger");
-      azalt.addEventListener("click",()=>{
-        let val=parseInt(deger.textContent);
-        if(val>0)deger.textContent=val-1;
-      });
-      artir.addEventListener("click",()=>{
-        let val=parseInt(deger.textContent);
-        deger.textContent=val+1;
-      });
-    });
-  });
-
-  const rows=document.querySelectorAll("#skorTablo tr");
-  rows.forEach((r,i)=>{
-    if(i===0)return;
-    r.querySelectorAll("input,.secenek,button").forEach(el=>{
-      el.oninput=()=>kilitleOnceki(i);
-      el.onclick=()=>kilitleOnceki(i);
-    });
-  });
+	}
 }
-
-function kilitleOnceki(satirIndex){
-  const rows=document.querySelectorAll("#skorTablo tr");
-  if(satirIndex>1){
-    const prev=rows[satirIndex-1];
-    const current=rows[satirIndex];
-    const currentInputs=current.querySelectorAll("input, .secenek.aktif, .deger");
-    const currentHasValue=[...currentInputs].some(el=>{
-      if(el.classList && el.classList.contains("deger")) return parseInt(el.textContent)>0;
-      if(el.tagName==="INPUT"&&el.type==="number") return el.value!=="";
-      return el.classList && el.classList.contains("aktif");
-    });
-
-    if(currentHasValue){
-      if(!prev.classList.contains("locked")){
-        prev.classList.add("locked");
-        prev.querySelectorAll("input, .secenek, button").forEach(e=>e.disabled=true);
-      }
-    } else {
-      if(prev.classList.contains("locked")){
-        prev.classList.remove("locked");
-        prev.querySelectorAll("input, .secenek, button").forEach(e=>e.disabled=false);
-      }
-    }
-  }
-}
-
-function yeniOyun(){
-  document.getElementById("oyunEkrani").classList.add("hidden");
-  document.getElementById("ayarEkrani").classList.remove("hidden");
-}
+//---------------------------------------------------------------------------------------
 
 let toplamlar = []; // Her oyuncunun toplam puanı
-
-function sonrakiEliAc(gecerliEl) {
-  const tablo = document.getElementById("skorTablo");
-  const satirlar = tablo.querySelectorAll("tr");
-  if (gecerliEl < satirlar.length - 1) {
-    satirlar[gecerliEl + 1].style.display = "table-row";
-  }
-}
 
 function elTamamlandiMi(elIndex) {
   const tablo = document.getElementById("skorTablo");
@@ -547,117 +683,333 @@ function elTamamlandiMi(elIndex) {
 }
 
 function hesaplaPuanlar() {
-  const tablo = document.getElementById("skorTablo");
-  const satirlar = tablo.querySelectorAll("tr");
-  const oyuncuSayisi = satirlar[0].querySelectorAll("th").length - 1;
+	const tablo = document.getElementById("skorTablo");
+	const satirlar = tablo.querySelectorAll("tr");
+	const oyuncuSayisi = satirlar[0].querySelectorAll("th").length - 1;
 
-  toplamlar = new Array(oyuncuSayisi).fill(0);
+	toplamlar = new Array(oyuncuSayisi).fill(0);
 
-  // tüm satırları gez
-  satirlar.forEach((satir, i) => {
-    if (i === 0) return; // başlık satırı
-    const hucreler = satir.querySelectorAll(".player-cell");
-    hucreler.forEach((cell, j) => {
-      let puan = 0;
-      const acamadi = cell.querySelector(".acmadi").classList.contains("aktif");
-      const elinde = parseInt(cell.querySelector(".elinde").value || 0);
-      const bitme = [...cell.querySelectorAll(".bitme")].find(b => b.classList.contains("aktif"));
-      const okey = cell.querySelector(".okey").classList.contains("aktif");
-      const masaAsti = cell.querySelector(".masa").classList.contains("aktif");
+	// 🔹 Her eli sırayla dolaş
+	satirlar.forEach((satir, i) => {
+		if (i === 0) return; // başlık satırını atla
+		const hucreler = satir.querySelectorAll(".player-cell");
 
-      const P = {
-        acamama: parseInt(document.getElementById("p_acamama").value),
-        bitirme: parseInt(document.getElementById("p_bitirme").value),
-        eldenbit: parseInt(document.getElementById("p_eldenbit").value),
-        ciftbit: parseInt(document.getElementById("p_ciftbit").value),
-        okeybit: parseInt(document.getElementById("p_okeybit").value),
-        eldenokey: parseInt(document.getElementById("p_eldenokey").value),
-        ciftokey: parseInt(document.getElementById("p_ciftokey").value),
-        masaAsma: parseInt(document.getElementById("p_masaAsma").value),
-      };
+		// 🔹 O elde kim bitmiş ve okey ile bitmiş mi bul
+		let okeyCarpani = 1;
+		let bitenIndex = null;
+		let bitmeTipi = "";
 
-      const C = {
-        islek: parseInt(cell.querySelector(".deger.islek").textContent),
-        hatali: parseInt(cell.querySelector(".deger.hatali").textContent),
-        kaptir: parseInt(cell.querySelector(".deger.kaptir").textContent),
-        c_islek: parseInt(document.getElementById("c_islek").value),
-        c_hatali: parseInt(document.getElementById("c_hatali").value),
-        c_okeykaptir: parseInt(document.getElementById("c_okeykaptir").value),
-      };
+		hucreler.forEach((cell, idx) => {
+			const bitme = [...cell.querySelectorAll(".bitme")].find(b => b.classList.contains("aktif"));
+			const okey = cell.querySelector(".okey").classList.contains("aktif");
+			if (bitme) {
+				bitenIndex = idx;
+				bitmeTipi = bitme.textContent;
+				if (okey) {
+					if (bitmeTipi.includes("Elden") || bitmeTipi.includes("Çift")) okeyCarpani = 4;
+					else okeyCarpani = 2;
+				}
+			}
+		});
 
-      // hesaplama mantığı
-      if (acamadi) puan += P.acamama;
-      if (elinde) puan += elinde;
-      if (bitme) {
-        const tip = bitme.textContent;
-        if (tip.includes("Elden")) puan += P.eldenbit;
-        else if (tip.includes("Çift")) puan += P.ciftbit;
-        else puan += P.bitirme;
-        if (okey) {
-          if (tip.includes("Elden")) puan += P.eldenokey;
-          else if (tip.includes("Çift")) puan += P.ciftokey;
-          else puan += P.okeybit;
-        }
-      }
-      if (masaAsti) puan += P.masaAsma;
+		// 🔸 Her oyuncunun puanını hesapla
+		hucreler.forEach((cell, j) => {
+			let puanTemel = 0;
+			let cezaToplam = 0;
 
-      // cezalar
-      const cezaToplam =
-        (C.islek * C.c_islek) +
-        (C.hatali * C.c_hatali) +
-        (C.kaptir * C.c_okeykaptir);
+			const acamadi = cell.querySelector(".acmadi").classList.contains("aktif");
+			const elinde = parseInt(cell.querySelector(".elinde").value || 0);
+			const bitme = [...cell.querySelectorAll(".bitme")].find(b => b.classList.contains("aktif"));
+			const masaAsti = cell.querySelector(".masa").classList.contains("aktif");
 
-      puan -= cezaToplam;
+			const P = {
+				acamama: parseInt(document.getElementById("p_acamama").value),
+				bitirme: parseInt(document.getElementById("p_bitirme").value),
+				eldenbit: parseInt(document.getElementById("p_eldenbit").value),
+				ciftbit: parseInt(document.getElementById("p_ciftbit").value),
+				masaAsma: parseInt(document.getElementById("p_masaAsma").value),
+			};
 
-      toplamlar[j] += puan;
-    });
-  });
+			const C = {
+				islek: parseInt(cell.querySelector(".deger.islek").textContent),
+				hatali: parseInt(cell.querySelector(".deger.hatali").textContent),
+				kaptir: parseInt(cell.querySelector(".deger.kaptir").textContent),
+				c_islek: parseInt(document.getElementById("c_islek").value),
+				c_hatali: parseInt(document.getElementById("c_hatali").value),
+				c_okeykaptir: parseInt(document.getElementById("c_okeykaptir").value),
+			};
+
+			// 🔸 PUANLAMA (temel puan)
+			if (acamadi) puanTemel += P.acamama;
+			if (elinde) puanTemel += elinde;
+			if (bitme) {
+				const tip = bitme.textContent;
+				if (tip.includes("Elden")) puanTemel += P.eldenbit;
+				else if (tip.includes("Çift")) puanTemel += P.ciftbit;
+				else puanTemel += P.bitirme;
+			}
+			if (masaAsti) puanTemel += P.masaAsma;
+
+			// 🔻 CEZALAR (sabit, çarpana dahil değil)
+			cezaToplam =
+				(C.islek * C.c_islek) +
+				(C.hatali * C.c_hatali) +
+				(C.kaptir * C.c_okeykaptir);
+
+			// 🔹 Eğer OKEY İLE bitmiş biri varsa:
+			// - Bitirenin kendi puanı değişmez
+			// - Diğer oyuncuların temel puanı × okeyCarpani
+			let toplamPuan;
+			if (bitenIndex !== null && j !== bitenIndex && okeyCarpani > 1) {
+			toplamPuan = (puanTemel * okeyCarpani) + cezaToplam;
+			} else {
+			toplamPuan = puanTemel + cezaToplam;
+			}
+
+			toplamlar[j] += toplamPuan;
+		});
+	});
 
   guncelleToplamGorunumu();
 }
 
 function guncelleToplamGorunumu() {
-  let toplamDiv = document.getElementById("toplamPuanlar");
-  if (!toplamDiv) {
-    toplamDiv = document.createElement("div");
-    toplamDiv.id = "toplamPuanlar";
-    toplamDiv.className = "section-title";
-    document.getElementById("oyunEkrani").appendChild(toplamDiv);
-  }
-  let html = "<h4>Toplam Puanlar</h4><table style='width:100%;text-align:center;border-collapse:collapse;'><tr>";
-  const tablo = document.getElementById("skorTablo");
-  const isimler = [...tablo.querySelectorAll("th")].slice(1).map(th => th.textContent);
-  isimler.forEach((isim, i) => {
-    html += `<th>${isim}</th>`;
-  });
-  html += "</tr><tr>";
-  toplamlar.forEach(p => html += `<td>${p}</td>`);
-  html += "</tr></table>";
-  toplamDiv.innerHTML = html;
+	let toplamDiv = document.getElementById("toplamPuanlar");
+	if (!toplamDiv) {
+		toplamDiv = document.createElement("div");
+		toplamDiv.id = "toplamPuanlar";
+		toplamDiv.className = "section-title";
+		document.getElementById("oyunEkrani").appendChild(toplamDiv);
+	}
+	let html = "<h4>Toplam Puanlar</h4><table style='width:100%;text-align:center;border-collapse:collapse;'><tr>";
+	const tablo = document.getElementById("skorTablo");
+	const isimler = [...tablo.querySelectorAll("th")].slice(1).map(th => th.textContent);
+	isimler.forEach((isim) => {
+		html += `<th>${isim}</th>`;
+	});
+	html += "</tr><tr>";
+	toplamlar.forEach(p => html += `<td>${p}</td>`);
+	html += "</tr></table>";
+	toplamDiv.innerHTML = html;
 }
 
-// Oyun davranışları aktifken değişiklikleri dinle:
+// 🔹 Oyun davranışları aktifken değişiklikleri dinle:
 document.addEventListener("input", (e) => {
-  if (e.target.closest(".player-cell")) {
+	if (e.target.closest(".player-cell")) {
     const td = e.target.closest("td");
     const id = td.id;
     const parca = id.split("_");
     const elNo = parseInt(parca[1]);
-    if (elTamamlandiMi(elNo)) sonrakiEliAc(elNo);
+
     hesaplaPuanlar();
-  }
+	}
 });
 
 document.addEventListener("click", (e) => {
-  if (e.target.closest(".secenek")) {
-    const td = e.target.closest("td");
-    const id = td.id;
-    const parca = id.split("_");
-    const elNo = parseInt(parca[1]);
-    if (elTamamlandiMi(elNo)) sonrakiEliAc(elNo);
-    hesaplaPuanlar();
+	if (e.target.closest(".secenek") || e.target.classList.contains("artir") || e.target.classList.contains("azalt")) {
+		const td = e.target.closest("td");
+		if (!td) return;
+		const id = td.id;
+		const parca = id.split("_");
+		const elNo = parseInt(parca[1]);
+
+		hesaplaPuanlar();
+	}
+});
+
+// 🔹 LocalStorage verisini kaydet
+function verileriKaydet() {
+  const tablo = [];
+  document.querySelectorAll("#skorTablo tr").forEach((tr, i) => {
+    if (i === 0) return; // başlık satırını atla
+    const elVeri = [];
+    tr.querySelectorAll(".player-cell").forEach((cell) => {
+      elVeri.push({
+        acamadi: cell.querySelector(".acmadi").classList.contains("aktif"),
+        elinde: cell.querySelector(".elinde").value,
+        bitme: [...cell.querySelectorAll(".bitme")].find(b => b.classList.contains("aktif"))?.textContent || null,
+        okey: cell.querySelector(".okey").classList.contains("aktif"),
+        masa: cell.querySelector(".masa").classList.contains("aktif"),
+        islek: cell.querySelector(".deger.islek").textContent,
+        hatali: cell.querySelector(".deger.hatali").textContent,
+        kaptir: cell.querySelector(".deger.kaptir").textContent,
+      });
+    });
+    tablo.push(elVeri);
+  });
+
+  localStorage.setItem("okey101_veriJSON", JSON.stringify(tablo));
+
+  const toplamlarData = JSON.stringify(toplamlar);
+  localStorage.setItem("okey101_toplamlar", toplamlarData);
+  localStorage.setItem("okey101_oyunAktif", !document.getElementById("oyunEkrani").classList.contains("hidden"));
+}
+
+// 🔹 LocalStorage verisini yükle
+function verileriYukle() {
+	window.esliAyrı = true; // Bu, sadece eşli-bireysel modu yeniden aktif eder
+	document.getElementById("oyunBilgisi").innerHTML = `<h3>Eşli (Ayrı Ayrı)</h3>`;
+  const oyunAktif = localStorage.getItem("okey101_oyunAktif") === "true";
+  const tabloVeri = JSON.parse(localStorage.getItem("okey101_veriJSON") || "[]");
+  if (!oyunAktif || tabloVeri.length === 0) return; // veri yoksa çık
+
+  document.getElementById("ayarEkrani").classList.add("hidden");
+  document.getElementById("oyunEkrani").classList.remove("hidden");
+
+  // tabloyu JSON verisine göre yeniden oluştur
+  const oyuncuSayisi = tabloVeri[0].length;
+  const turSayisi = tabloVeri.length;
+
+  // oyuncu adlarını tahmin et (eski kayıt yoksa varsayılan)
+  const isimler = [];
+  for (let i = 0; i < oyuncuSayisi; i++) isimler.push(`Oyuncu ${i + 1}`);
+
+  let html = "<tr><th>El</th>";
+  isimler.forEach(o => html += `<th>${o}</th>`);
+  html += "</tr>";
+
+  for (let el = 1; el <= turSayisi; el++) {
+    html += `<tr><td><b>${el}</b></td>`;
+    for (let idx = 0; idx < oyuncuSayisi; idx++) {
+      html += `
+      <td id='cell_${el}_${idx}' class='player-cell'>
+        <div class='kategori kat1'>
+          <h4>Açma Durumu</h4>
+          <span class='secenek acmadi ${tabloVeri[el - 1][idx].acamadi ? "aktif" : ""}'>Açamadı</span>
+          <span>Elinde: <input type='number' class='elinde' min='0' max='200' value='${tabloVeri[el - 1][idx].elinde || ""}'></span>
+        </div>
+        <div class='kategori kat2'>
+          <h4>Bitme Türü</h4>
+          <span class='secenek bitme ${tabloVeri[el - 1][idx].bitme === "Bitti" ? "aktif" : ""}'>Bitti</span>
+          <span class='secenek bitme ${tabloVeri[el - 1][idx].bitme === "Elden Bitti" ? "aktif" : ""}'>Elden Bitti</span>
+          <span class='secenek bitme ${tabloVeri[el - 1][idx].bitme === "Çiftle Bitti" ? "aktif" : ""}'>Çiftle Bitti</span>
+          <span class='secenek okey ${tabloVeri[el - 1][idx].okey ? "aktif" : "hidden"}'>Okey ile</span>
+        </div>
+        <div class='kategori kat3'>
+          <h4>Cezalar / Masa Aşımı</h4>
+          <span class='secenek masa ${tabloVeri[el - 1][idx].masa ? "aktif" : ""}'>Masa Aştı</span>
+          <div class='ceza-satiri'>İşlek Atma:
+            <button class='azalt'>-</button>
+            <span class='deger islek'>${tabloVeri[el - 1][idx].islek}</span>
+            <button class='artir'>+</button>
+          </div>
+          <div class='ceza-satiri'>Hatalı Açma:
+            <button class='azalt'>-</button>
+            <span class='deger hatali'>${tabloVeri[el - 1][idx].hatali}</span>
+            <button class='artir'>+</button>
+          </div>
+          <div class='ceza-satiri'>Okey Kaptırma:
+            <button class='azalt'>-</button>
+            <span class='deger kaptir'>${tabloVeri[el - 1][idx].kaptir}</span>
+            <button class='artir'>+</button>
+          </div>
+        </div>
+      </td>`;
+    }
+    html += "</tr>";
+  }
+
+  document.getElementById("skorTablo").innerHTML = html;
+  aktiflestirDavranislar();
+
+  toplamlar = JSON.parse(localStorage.getItem("okey101_toplamlar") || "[]");
+  guncelleToplamGorunumu();
+  
+  // Yükledikten sonra mevcut dolu satırlara göre önceki elleri yeniden kilitle
+const rows = document.querySelectorAll("#skorTablo tr");
+for (let i = 2; i < rows.length; i++) {
+  kilitleOnceki(i);
+ 
+}
+
+// 🩹 Yükleme sonrası hücre görünüm durumlarını düzelt
+document.querySelectorAll(".player-cell").forEach(cell => {
+  const acmadi = cell.querySelector(".acmadi");
+  const elinde = cell.querySelector(".elinde");
+  const bitmeler = cell.querySelectorAll(".bitme");
+  const okey = cell.querySelector(".okey");
+  const kat1 = cell.querySelector(".kat1");
+  const kat2 = cell.querySelector(".kat2");
+
+  const acmadiAktif = acmadi.classList.contains("aktif");
+  const elVal = elinde.value.trim();
+  const bitmeAktif = [...bitmeler].some(b => b.classList.contains("aktif"));
+
+  // 🔸 Eğer biri bitti olarak işaretliyse kendi dışında herkesin kat2'si gizlenmeli
+  if (bitmeAktif) {
+    kat1.style.display = "none";
+    okey.classList.remove("hidden");
+    bitmeler.forEach(b => {
+      if (!b.classList.contains("aktif")) b.style.display = "none";
+    });
+  } else {
+    // Bitmemişse, açamadı ve elinde durumuna göre görünürlük ayarla
+    if (acmadiAktif) {
+      elinde.parentElement.style.display = "none";
+      elinde.disabled = true;
+      kat2.style.display = "none";
+    } else if (elVal !== "") {
+      acmadi.style.display = "none";
+      kat2.style.display = "none";
+    } else {
+      // Hiçbiri seçilmediyse hepsi açık
+      acmadi.style.display = "inline-block";
+      elinde.parentElement.style.display = "inline-block";
+      elinde.disabled = false;
+      kat2.style.display = "block";
+    }
   }
 });
+
+// 🟩 Eşli-bireysel: Biri "Bitti" ise takım arkadaşı gizlensin
+if (window.esliAyrı) {
+  const rows = document.querySelectorAll("#skorTablo tr");
+  rows.forEach((r, i) => {
+    if (i === 0) return;
+    const cells = r.querySelectorAll(".player-cell");
+    cells.forEach((cell, idx) => {
+      const bitmeAktif = cell.querySelector(".bitme.aktif");
+      if (bitmeAktif) {
+        const takimEs = (idx % 2 === 0) ? idx + 1 : idx - 1;
+        const takimCell = cells[takimEs];
+        if (takimCell) {
+          takimCell.querySelector(".kat1").style.display = "none";
+          takimCell.querySelector(".kat2").style.display = "none";
+          takimCell.querySelector(".elinde").value = "";
+          takimCell.querySelector(".acmadi").classList.remove("aktif");
+        }
+      }
+    });
+  });
+}
+}
+
+
+// 🔹 Sayfa kapanmadan önce kaydet
+window.addEventListener("beforeunload", () => {
+  verileriKaydet();
+});
+
+// 🔹 Sayfa açıldığında yükle
+window.addEventListener("load", () => {
+  verileriYukle();
+});
+
+// 🔹 “Yeni Oyun” seçildiğinde kaydı temizle
+function yeniOyun() {
+  localStorage.removeItem("okey101_tablo");
+  localStorage.removeItem("okey101_toplamlar");
+  localStorage.removeItem("okey101_ayarlar");
+  localStorage.removeItem("okey101_oyunAktif");
+  localStorage.removeItem("okey101_elVerileri");
+  localStorage.removeItem("okey101_veriJSON");
+  document.getElementById("oyunEkrani").classList.add("hidden");
+  document.getElementById("ayarEkrani").classList.remove("hidden");
+  if (!document.getElementById("oyunEkrani") || document.getElementById("oyunEkrani").classList.contains("hidden")) return;
+
+  
+}
+
 </script>
 </body>
 </html>
