@@ -786,7 +786,18 @@ function toplamPuanHesapla() {
       const esIndex = takimEs[bitenIndex];
 
       // Takım arkadaşı 0 alır
-      elPuanlari[esIndex] = 0;
+      const esCell = hucreler[esIndex];
+if (esCell) {
+  let cezaToplam = 0;
+  const masa = esCell.querySelector('.masa-btn.aktif');
+  const cezalar = esCell.querySelectorAll('.ceza-satiri span');
+  cezalar.forEach(span => {
+    const adet = parseInt(span.textContent || '0', 10);
+    if (adet > 0) cezaToplam += adet * 101;
+  });
+  if (masa) cezaToplam -= 101;
+  elPuanlari[esIndex] = cezaToplam; // sadece ceza etkileri kalır
+}
 
       // Diğer iki oyuncunun puanı çarpılır
       hucreler.forEach((_, i) => {
