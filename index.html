@@ -341,8 +341,6 @@ function stateTopla() {
       .map(inp => inp.value || ''),
     eller: [],
   };
-//--
-	state.eller = [];
 
   document.querySelectorAll('tbody tr').forEach((tr) => {
     const el = [];
@@ -586,14 +584,6 @@ function stateYukle() {
     const raw = localStorage.getItem(LS_KEY);
     if (!raw) return;
     const s = JSON.parse(raw);
-	
-	// 🧹 Bozuk veya anormal uzun kayıt varsa sıfırla
-    if (!Array.isArray(s.eller) || s.eller.length > 33) {
-      localStorage.removeItem(LS_KEY);
-      console.warn("Bozuk kayıt tespit edildi, sıfırlandı.");
-      return;
-    }
-	
     stateUygula(s);
   } catch (e) {
     console.warn('Yükleme hatası:', e);
