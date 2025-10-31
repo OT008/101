@@ -544,8 +544,7 @@ tumSatirlar.forEach((tr) => {
   }
   
 // 🔹 Son el boşsa bir önceki eli yeniden aktif yap
-  const tbody = document.querySelector('tbody');
-  const satirlar = tbody.querySelectorAll('tr');
+
   if (satirlar.length >= 2) {
     const onceki = satirlar[satirlar.length - 2];
     const son = satirlar[satirlar.length - 1];
