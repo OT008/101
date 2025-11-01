@@ -193,6 +193,12 @@ tfoot td:first-child {
   background: #4a90e2;
   color: white;
 }
+
+/* --- Pasif Satır Stili --- */
+.pasif {
+  pointer-events: none !important;
+  opacity: 0.5;
+}
 </style>
 </head>
 <body>
@@ -358,8 +364,8 @@ function stateTopla() {
     const pasifEller = [];
   document.querySelectorAll('tbody tr').forEach((tr, idx) => {
     const ilkEl = tr.querySelector('.player-cell .secenek');
-    // Eğer satırdaki ilk seçenek butonu pasifse (pointer-events: none)
-    if (ilkEl && getComputedStyle(ilkEl).pointerEvents === 'none') {
+    // Eğer satırdaki ilk seçenek butonu pasifse (opacity 0.5 ile kontrol edilebilir)
+    if (ilkEl && ilkEl.classList.contains('pasif')) {
       pasifEller.push(idx);
     }
   });
@@ -378,12 +384,18 @@ function stateUygula(state) {
   const tbody = document.querySelector('tbody');
   
   // 2. El sayısını eşitle (gerekenden azsa yeniElEkle ile çoğalt)
-  while (tbody.querySelectorAll('tr').length < state.eller.length) {
-    yeniElEkle(); // Bu yeni satır eklerken roleriAta'yı da çağırır.
+  // Mevcut satır 1. el olduğu için, eklenmesi gereken el sayısı: state.eller.length - 1
+  let mevcutSatirSayisi = tbody.querySelectorAll('tr').length;
+  if (mevcutSatirSayisi < state.eller.length) {
+    for (let i = mevcutSatirSayisi; i < state.eller.length; i++) {
+        yeniElEkle(true); // Geri yükleme sırasında yeni el ekle, ancak pasifleştirme yapma
+    }
   }
 
-  // 3. Tüm hücreleri “temiz” baza çek (Geri yüklemeden önce temizlik)
+  // 3. Tüm hücreleri "temiz" baza çek (Geri yüklemeden önce temizlik)
   tbody.querySelectorAll('tr').forEach((tr) => {
+    tr.classList.remove('pasif');
+    tr.querySelectorAll('.pasif').forEach(p => p.classList.remove('pasif')); // Pasif class'larını kaldır
     tr.querySelectorAll('.secenek').forEach(s => { s.classList.remove('aktif'); s.style.display = 'inline-block'; });
     tr.querySelectorAll('.kalan-input').forEach(i => i.remove());
     tr.querySelectorAll('.bitti-ekstra').forEach(e => e.remove());
@@ -448,8 +460,7 @@ function stateUygula(state) {
         if (acBtn) acBtn.style.display = 'none';
         if (bitBtn) bitBtn.style.display = 'none';
       } else if (h.kalanDeger && !kalBtn) {
-          // Eğer Kalan butonu DOM'dan tamamen kaldırılmışsa (biten oyuncunun eşi gibi), 
-          // bu durumda inputu koymaya gerek yok (ve zaten bitti mantığı devreye girecektir).
+          // Eğer Kalan butonu DOM'dan tamamen kaldırılmışsa (biten oyuncunun eşi gibi)
       }
 
 
@@ -484,8 +495,7 @@ function stateUygula(state) {
       h.cezalar?.forEach((val, i) => { if (spList[i]) spList[i].textContent = String(val||0); });
     });
     
-    // 5. Biten oyuncunun takım arkadaşı ayarlamalarını yap
-    // Bu kısım state'in geri yüklenmesi sırasında da Bitti mantığını simüle etmeli
+    // 5. Biten oyuncunun takım arkadaşı ayarlamalarını yap (Bitti mantığını simüle et)
     cells.forEach((cell, idx) => {
         const bitmeAktif = cell.querySelector('.secenek[data-role="bitti"].aktif');
         if (bitmeAktif) {
@@ -493,37 +503,24 @@ function stateUygula(state) {
           const takimCell = cells[takimEs];
           if (takimCell) {
             
-            // 🔹 Takım arkadaşının Açma Durumu kategorisini gizle
             const acmaDurumu = takimCell.querySelector('.kategori:first-of-type'); 
             if (acmaDurumu) acmaDurumu.style.display = 'none';
 
-            // 🔹 Bitti Ekstra (Okey/Elden) panelini gizle (varsa)
             const bittiEkstra = takimCell.querySelector('.bitti-ekstra');
             if (bittiEkstra) bittiEkstra.style.display = 'none';
 
-            // 🔹 Elinde varsa inputu/butonu sil/gizle
             const elInput = takimCell.querySelector('.kalan-input');
             if (elInput) elInput.remove();
             
             const kalanBtn = takimCell.querySelector('[data-role="kalan"]');
-            if (kalanBtn) kalanBtn.style.display = 'none'; // Kalan butonu varsa gizle
+            if (kalanBtn) kalanBtn.style.display = 'none';
 
-            // 🔹 Masa butonu görünür kalsın (ve aktif olmasın)
             const masaBtn = takimCell.querySelector('.masa-btn');
             if (masaBtn) {
               masaBtn.classList.remove('aktif');
               masaBtn.style.display = 'inline-block';
             }
             
-            // Diğer oyuncuların Bitti butonlarını gizle (o an biten oyuncunun dışındakiler)
-            tr.querySelectorAll('.player-cell').forEach(c => {
-              if (c !== cell && c !== takimCell) {
-                const bb = c.querySelector('[data-role="bitti"]');
-                if (bb && !bb.classList.contains('aktif')) bb.style.display = 'none';
-              }
-            });
-            
-            // Takım arkadaşının cezalar dışındaki her şeyini sıfırla/gizle (Cezalar kategori başlığını da göster)
             const acmadiBtn = takimCell.querySelector('[data-role="acmadi"]');
             if (acmadiBtn) acmadiBtn.style.display = 'none';
             const bittiBtn = takimCell.querySelector('[data-role="bitti"]');
@@ -533,7 +530,7 @@ function stateUygula(state) {
     });
   });
 
-  // 6. Pasif elleri (kilitli eski elleri) tekrar pasifleştir
+  // 6. Kaydedilmiş pasif elleri tekrar pasifleştir
   const tumSatirlar = document.querySelectorAll('tbody tr');
   if (state.pasifEller && state.pasifEller.length) {
     state.pasifEller.forEach(i => {
@@ -541,42 +538,9 @@ function stateUygula(state) {
       if (!tr) return;
       tr.querySelectorAll('.secenek, .masa-btn, .artir, .azalt, .kalan-input').forEach(el => {
         el.classList.add('pasif');
-        el.style.pointerEvents = 'none';
-        el.style.opacity = '0.5';
       });
     });
   }
-
-  // 7. Son el boşsa bir önceki eli yeniden aktif yap (Kilitleme mantığını geri yükle)
-  if (tumSatirlar.length >= 2) {
-    const onceki = tumSatirlar[tumSatirlar.length - 2];
-    const son = tumSatirlar[tumSatirlar.length - 1];
-
-    const aktifVarMi = son.querySelector('.secenek.aktif, .masa-btn.aktif, .bitti-ekstra');
-    const kalanInputVarMi = son.querySelector('.kalan-input');
-    let cezaVarMi = false;
-    son.querySelectorAll('.ceza-satiri span').forEach(sp => {
-      if (parseInt(sp.textContent || '0', 10) > 0) cezaVarMi = true;
-    });
-
-    if (!aktifVarMi && !kalanInputVarMi && !cezaVarMi) {
-      onceki.querySelectorAll('.secenek, .masa-btn, .artir, .azalt, .kalan-input').forEach(el => {
-        el.classList.remove('pasif');
-        el.style.pointerEvents = 'auto';
-        el.style.opacity = '1';
-      });
-    } else {
-         // Son el doluysa, bir önceki eli pasifleştir (Kayıtlı pasif el olmasa bile)
-         onceki.querySelectorAll('.secenek, .masa-btn, .artir, .azalt, .kalan-input').forEach(el => {
-            el.classList.add('pasif');
-            el.style.pointerEvents = 'none';
-            el.style.opacity = '0.5';
-        });
-    }
-  }
-  
-  // 8. Skorları tazele
-  toplamPuanHesapla();
 }
 
 function stateKaydet() {
@@ -597,7 +561,12 @@ function stateYukle() {
     }
     const s = JSON.parse(raw);
     stateUygula(s);
-    roleriAta(); // 👈 ÖNEMLİ: Geri yükleme sonrası tüm DOM'a rolleri yeniden ata
+    roleriAta(); // Geri yükleme sonrası tüm DOM'a rolleri yeniden ata
+    
+    // 🔹 EK KONTROL: State yüklendikten sonra, son el doluysa bir sonraki boş eli ekle ve pasifleştirmeyi yap
+    elKontrolVeEkle();
+
+    toplamPuanHesapla();
   } catch (e) {
     console.warn('Yükleme hatası:', e);
   }
@@ -606,28 +575,69 @@ function stateYukle() {
 function yeniOyunSifirla() {
   if (confirm("Yeni oyun başlatmak istediğinizden emin misiniz? Tüm skorlar sıfırlanacaktır.")) {
     localStorage.removeItem(LS_KEY);
-    location.reload(); // en güvenlisi: sayfayı ilk haline al
+    location.reload(); 
   }
 }
 
-// --- Olaylara bağla: her tıklama ve input sonrası kaydet
-document.addEventListener('click', (e) => {
-  const hedef = e.target.closest('.secenek, .masa-btn, .artir, .azalt, .kalan-input');
-  if (!hedef) return;
-  // ufak bir gecikme; DOM değişikliği bittiğinde state alınsın
-  setTimeout(stateKaydet, 0);
-});
-document.addEventListener('input', (e) => {
-  if (e.target.closest('.kalan-input') || e.target.classList.contains('oyuncu-isim')) {
-    setTimeout(stateKaydet, 0);
-  }
-});
+// --- Yeni El ve Pasifleştirme/Aktifleştirme Mantığı (Tek yerde toplandı) ---
+function elKontrolVeEkle() {
+    const tbody = document.querySelector('tbody');
+    const satirlar = tbody.querySelectorAll('tr');
+    if (satirlar.length === 0) return;
 
-// --- Yükle ve “Yeni Oyun” butonunu bağla
-window.addEventListener('load', stateYukle);
-document.getElementById('btnYeniOyun')?.addEventListener('click', yeniOyunSifirla);
-// ===============================================================================
-//-----------------------------------------------------------------------------------------↓
+    const sonSatir = satirlar[satirlar.length - 1];
+    const oncekiSatir = satirlar[satirlar.length - 2];
+
+    const aktifVarMi = sonSatir.querySelector('.secenek.aktif, .masa-btn.aktif, .bitti-ekstra');
+    const kalanInputVarMi = sonSatir.querySelector('.kalan-input');
+    let cezaVarMi = false;
+    sonSatir.querySelectorAll('.ceza-satiri span').forEach(sp => {
+      if (parseInt(sp.textContent || '0', 10) > 0) cezaVarMi = true;
+    });
+
+    // 1. Yeni el ekleme kontrolü
+    if (tumOyuncularAldiMi(sonSatir) && (aktifVarMi || kalanInputVarMi || cezaVarMi)) {
+      yeniElEkle();
+      // Yeni el eklenince, önceki (yani sonSatir) el pasif olmalı (2. adımda yapılacak)
+    }
+
+    // 2. Pasifleştirme / Aktifleştirme (2. el ve sonrası için)
+    if (satirlar.length >= 2) {
+        const yeniSonSatir = tbody.querySelectorAll('tr')[tbody.querySelectorAll('tr').length - 1];
+        const yeniOncekiSatir = tbody.querySelectorAll('tr')[tbody.querySelectorAll('tr').length - 2];
+        
+        const yeniAktifVarMi = yeniSonSatir.querySelector('.secenek.aktif, .masa-btn.aktif, .bitti-ekstra');
+        const yeniKalanInputVarMi = yeniSonSatir.querySelector('.kalan-input');
+        let yeniCezaVarMi = false;
+        yeniSonSatir.querySelectorAll('.ceza-satiri span').forEach(sp => {
+          if (parseInt(sp.textContent || '0', 10) > 0) yeniCezaVarMi = true;
+        });
+
+        // a) Yeni eklenen son el boşsa:
+        if (!yeniAktifVarMi && !yeniKalanInputVarMi && !yeniCezaVarMi) {
+            // Önceki eli aktif et (pasif class'ını kaldır)
+            yeniOncekiSatir.querySelectorAll('.secenek, .masa-btn, .artir, .azalt, .kalan-input').forEach(el => {
+                el.classList.remove('pasif');
+            });
+        } 
+        // b) Son el doluysa (veya yeni bir el eklendiyse):
+        else {
+            // Önceki eli pasif et (pasif class'ını ekle)
+            yeniOncekiSatir.querySelectorAll('.secenek, .masa-btn, .artir, .azalt, .kalan-input').forEach(el => {
+                el.classList.add('pasif');
+            });
+        }
+    }
+}
+
+
+// --- Fonksiyonları Basitleştirme ---
+function anaIslemleriYap() {
+    stateKaydet();
+    elKontrolVeEkle();
+    toplamPuanHesapla();
+}
+
 // --- Başlangıç: Açma Durumu üçlüsüne data-role ata ---
 function roleriAta() {
   document.querySelectorAll('.player-cell .kategori:first-child').forEach(kat => {
@@ -638,14 +648,10 @@ function roleriAta() {
   });
 }
 
-// roleriAta'yı burada çağırmak yerine, window.onload veya stateYukle içinde kontrol altına aldık.
-
-
 // --- Yardımcı: hücre indexine göre takım arkadaşını bul ---
 function takimEsIndex(cell) {
   const row = cell.closest('tr');
   const idx = Array.from(row.children).indexOf(cell);
-  // El sütunu 0. index; oyuncular 1..4
   if (idx === 1) return 2;
   if (idx === 2) return 1;
   if (idx === 3) return 4;
@@ -659,18 +665,16 @@ function handleAcmadi(btn) {
   const kalan = kat.querySelector('[data-role="kalan"]');
   const bitti = kat.querySelector('[data-role="bitti"]');
   const masaBtn = cell.querySelector('.masa-btn');
-  const kalanInput = cell.querySelector('.kalan-input'); // Ek: kalan input varsa sil
+  const kalanInput = cell.querySelector('.kalan-input'); 
 
   const acikMi = btn.classList.toggle('aktif');
 
   if (acikMi) {
-    // Buton aktif oldu → diğerlerini gizle
-    if (kalanInput) kalanInput.remove(); // Input varsa kaldır
+    if (kalanInput) kalanInput.remove(); 
     if (kalan) kalan.style.display = 'none';
     if (bitti) bitti.style.display = 'none';
     if (masaBtn) masaBtn.style.display = 'none';
   } else {
-    // Buton pasif oldu → diğerlerini geri göster
     if (kalan) kalan.style.display = 'inline-block';
     if (bitti) bitti.style.display = 'inline-block';
     if (masaBtn) masaBtn.style.display = 'inline-block';
@@ -682,11 +686,9 @@ function handleKalan(btn) {
   const acamadi = kat.querySelector('[data-role="acmadi"]');
   const bitti = kat.querySelector('[data-role="bitti"]');
 
-  // Açamadı ve Bitti butonlarını gizle
   if (acamadi) acamadi.style.display = 'none';
   if (bitti) bitti.style.display = 'none';
 
-  // Input oluştur
   const input = document.createElement('input');
   input.type = 'number';
   input.className = 'kalan-input';
@@ -694,29 +696,20 @@ function handleKalan(btn) {
   input.max = '252';
   input.placeholder = '0';
 
-  // Butonun yerini input alır
   btn.replaceWith(input);
   input.focus();
 
-  // Input odak kaybedince kontrol et
   input.addEventListener('blur', () => {
     if (!input.value || +input.value < 1) {
-      // Değer yoksa: inputu kaldır, butonu geri getir
       input.replaceWith(btn);
       if (acamadi) acamadi.style.display = 'inline-block';
       if (bitti) bitti.style.display = 'inline-block';
-      // Tekrar kayıt tetikle
-      setTimeout(stateKaydet, 0); 
-      toplamPuanHesapla();
     } else {
-      // Değer varsa: inputu kalıcı hale getir
       input.value = String(Math.min(252, Math.max(1, +input.value)));
       input.style.color = 'white';
       input.style.fontWeight = 'bold';
-      // Tekrar kayıt tetikle
-      setTimeout(stateKaydet, 0); 
-      toplamPuanHesapla();
     }
+    anaIslemleriYap();
   });
 }
 
@@ -734,14 +727,12 @@ function handleBitti(btn) {
   if (!aktifmiydi) {
     btn.classList.add('aktif');
 
-    // Kendi butonlarını gizle ve inputu kaldır (varsa)
     const kalanInput = cell.querySelector('.kalan-input');
     if (kalanInput) kalanInput.remove();
     if (acamadi) acamadi.style.display = 'none';
     if (kalanBtn) kalanBtn.style.display = 'none';
-    if (masaBtn) masaBtn.style.display = 'none'; // Biten kendi masasını da gizler
+    if (masaBtn) masaBtn.style.display = 'none'; 
 
-    // Okey/Elden panelini ekle
     const ekstraDiv = document.createElement('div');
     ekstraDiv.className = 'bitti-ekstra';
     ekstraDiv.style.marginTop = '6px';
@@ -751,7 +742,6 @@ function handleBitti(btn) {
     `;
     acmaKat.insertAdjacentElement('afterend', ekstraDiv);
 
-    // Diğer oyuncuların Bitti butonlarını gizle
     row.querySelectorAll('.player-cell').forEach(c => {
       if (c !== cell) {
         const b = c.querySelector('[data-role="bitti"]');
@@ -759,40 +749,34 @@ function handleBitti(btn) {
       }
     });
 
-    // 🔧 Takım arkadaşını sıfırla + gizle + MASA'yı nötrle ve görünür yap
+    // 🔧 Takım arkadaşını sıfırla + gizle
     if (esIdx) {
       const esCell = row.children[esIdx];
-      const esAcma = esCell.querySelector('.kategori:first-of-type'); // Sadece açma kategorisi
+      const esAcma = esCell.querySelector('.kategori:first-of-type'); 
       const esMasa = esCell.querySelector('.masa-btn');
       const esKalanInput = esCell.querySelector('.kalan-input');
       const esBittiEkstra = esCell.querySelector('.bitti-ekstra');
       
-      if (esKalanInput) esKalanInput.remove(); // Kalan input varsa sil
-      if (esBittiEkstra) esBittiEkstra.remove(); // Bitti ekstra varsa sil
+      if (esKalanInput) esKalanInput.remove();
+      if (esBittiEkstra) esBittiEkstra.remove();
 
       if (esAcma) {
-        // Tüm seçenekleri pasif yap
         esAcma.querySelectorAll('.secenek').forEach(s => s.classList.remove('aktif'));
-        // Açma kategorisini gizle
         esAcma.style.display = 'none';
       }
       if (esMasa) {
         esMasa.classList.remove('aktif');
-        esMasa.style.display = 'inline-block'; // MASA'yı görünür yap
+        esMasa.style.display = 'inline-block'; 
       }
-      
-      // Takım arkadaşının diğer oyunculara ait Bitti butonunu geri gösterme/gizleme mantığını da simüle etmeli (gerek yok, zaten Bitti butonu gizlenecek)
     }
 
   // 🔸 İkinci tıklama (geri alma)
   } else {
     btn.classList.remove('aktif');
 
-    // Okey/Elden panelini kaldır
     const ekstra = cell.querySelector('.bitti-ekstra');
     if (ekstra) ekstra.remove();
 
-    // Kendi butonlarını geri getir
     if (acamadi) acamadi.style.display = 'inline-block';
     if (kalanBtn) kalanBtn.style.display = 'inline-block';
     if (masaBtn) { masaBtn.classList.remove('aktif'); masaBtn.style.display = 'inline-block'; }
@@ -801,11 +785,10 @@ function handleBitti(btn) {
     row.querySelectorAll('.player-cell').forEach(c => {
       const b = c.querySelector('[data-role="bitti"]');
       const acmadiBtn = c.querySelector('[data-role="acmadi"]');
-      const kalanBtn2 = c.querySelector('[data-role="kalan"]');
       const kalanInput = c.querySelector('.kalan-input');
 
       const aktifAcmadi = acmadiBtn && acmadiBtn.classList.contains('aktif');
-      const aktifBitti = b && b.classList.contains('aktif'); // Başka biri bitmişse gizli kalmalı
+      const aktifBitti = b && b.classList.contains('aktif'); 
       const kalanDegerGirildi = Boolean(kalanInput && kalanInput.value);
 
       if (b && !aktifBitti) {
@@ -816,21 +799,19 @@ function handleBitti(btn) {
         }
       }
       
-      // Takım arkadaşı için özel olarak, onun bitti butonu da geri gelmeli.
       if (c === row.children[esIdx]) {
         if (b) b.style.display = 'inline-block';
       }
     });
 
-    // Takım arkadaşını geri getir ve sıralı şekilde sıfırla
+    // Takım arkadaşını geri getir
     if (esIdx) {
       const esCell = row.children[esIdx];
       const esAcma = esCell.querySelector('.kategori:first-of-type');
-	  const esMasa = esCell.querySelector('.masa-btn');
+	    const esMasa = esCell.querySelector('.masa-btn');
       if (esAcma) {
         esAcma.style.display = 'block';
 
-        // Tüm butonları aktiflikten çıkar ve görünür hale getir
         ['acmadi','kalan','bitti'].forEach(r => {
           const el = esAcma.querySelector(`[data-role="${r}"]`);
           if (el) {
@@ -852,29 +833,33 @@ document.addEventListener('click', (e) => {
   // --- AÇAMADI ---
   if (btn.dataset.role === 'acmadi') {
   handleAcmadi(btn);
+  setTimeout(anaIslemleriYap, 0); // DOM değişimi bitince genel işlemleri yap
   return;
 }
   // --- KALAN (buton) -> inputa dönüşecek ---
 if (btn.dataset.role === 'kalan') {
   handleKalan(btn);
-  return;
+  return; // Input blur'da anaIslemleriYap çağırılacak
 }
 //-----------------------------------------------------------------------------------------↑
   // --- BİTTİ (toggle) ---
 if (btn.dataset.role === 'bitti') {
   handleBitti(btn);
+  setTimeout(anaIslemleriYap, 0); 
   return;
 }
 //-----------------------------------------------------------------------------------------↓
   // --- OKEY / ELDEN (Bitti sonrası çıkanları tıkla) ---
   if (btn.classList.contains('okey') || btn.classList.contains('elden')) {
-    btn.classList.toggle('aktif'); // birlikte de seçilebilir
+    btn.classList.toggle('aktif');
+    setTimeout(anaIslemleriYap, 0); 
     return;
   }
 
   // --- MASA SAYISI (toggle) ---
   if (btn.classList.contains('masa-btn')) {
     btn.classList.toggle('aktif');
+    setTimeout(anaIslemleriYap, 0); 
     return;
   }
 
@@ -893,50 +878,42 @@ if (btn.dataset.role === 'bitti') {
     }
 
     degerEl.textContent = String(val);
+    setTimeout(anaIslemleriYap, 0); 
     return;
   }
 });
 //-----------------------------------------------------------------------------------------↑
 function tumOyuncularAldiMi(row) {
   const cells = row.querySelectorAll('.player-cell');
-  // Tüm hücrelerin (veya takım eşinin) bir durumu (Açamadı, Kalan, Bitti) kaydettiğinden emin ol.
+  
   return Array.from(cells).every(cell => {
     const acmaKat = cell.querySelector('.kategori:first-of-type');
-    if (!acmaKat) return true; // Eğer kategori yoksa (bitenin eşi gibi), tamamdır.
+    const aktifDurum = acmaKat?.querySelector('.secenek.aktif') || cell.querySelector('.kalan-input');
     
-    const aktif = acmaKat.querySelector('.secenek.aktif') || cell.querySelector('.kalan-input');
-    const bitti = cell.querySelector('[data-role="bitti"]')?.classList.contains('aktif');
-    
-    // El bitmişse (bitti aktifse), diğer elemanlara bakmaya gerek yok
-    if (bitti) return true; 
+    // Eğer aktif bir durum varsa (Açamadı, Kalan, Bitti)
+    if (aktifDurum) return true; 
 
-    // Cezalar ve Masa (ekstra cezalar da elin bittiği anlamına gelebilir, ancak burada sadece skor girişi kontrol edilir)
-    let cezaVarMi = false;
-    cell.querySelectorAll('.ceza-satiri span').forEach(sp => {
-        if (parseInt(sp.textContent || '0', 10) > 0) cezaVarMi = true;
-    });
-    const masaAktif = cell.querySelector('.masa-btn')?.classList.contains('aktif');
-
-    // Eğer Açamadı, Kalan, Bitti (veya takımdan biri bitmiş) veya Ceza/Masa durumu varsa, o oyuncu "girişi tamamlanmış" sayılır.
-    // Ancak, sadece Açamadı/Kalan/Bitti ile yeni ele geçilebilir. Cezalar tek başına yeni ele geçirtmemeli.
-    
-    const aktifDurumVar = Boolean(aktif);
-
-    // Eğer takım arkadaşı bitmişse
+    // Takım arkadaşı bitmişse
     const esIdx = takimEsIndex(cell);
     if (esIdx !== null) {
         const esCell = row.children[esIdx];
         const esBitti = esCell.querySelector('[data-role="bitti"]')?.classList.contains('aktif');
         if (esBitti) return true;
     }
+    
+    // Eğer aktif bir durum yok, ancak ceza veya masa girilmişse (bu da elin kapandığı anlamına gelir)
+    let cezaVarMi = false;
+    cell.querySelectorAll('.ceza-satiri span').forEach(sp => {
+        if (parseInt(sp.textContent || '0', 10) > 0) cezaVarMi = true;
+    });
+    const masaAktif = cell.querySelector('.masa-btn')?.classList.contains('aktif');
 
-    // Ya aktif bir durum var (Açamadı/Kalan/Bitti) ya da takım arkadaşı bitmiş
-    return aktifDurumVar; 
+    return cezaVarMi || masaAktif;
   });
 }
 
-// --- Yeni el ekleme fonksiyonu ---
-function yeniElEkle() {
+// --- Yeni el ekleme fonksiyonu (geri yükleme için 'isRestoring' flag eklendi) ---
+function yeniElEkle(isRestoring = false) {
   const tbody = document.querySelector('tbody');
   const satirlar = tbody.querySelectorAll('tr');
   const sonSatir = satirlar[satirlar.length - 1];
@@ -945,6 +922,9 @@ function yeniElEkle() {
   
   // Yeni satırı temizle
   yeniSatir.querySelector('td:first-child').innerHTML = `<b>${yeniElNo}</b>`;
+  yeniSatir.classList.remove('pasif');
+  yeniSatir.querySelectorAll('.pasif').forEach(p => p.classList.remove('pasif'));
+  
   yeniSatir.querySelectorAll('.secenek').forEach(s => {
     s.classList.remove('aktif');
     s.style.display = 'inline-block';
@@ -960,7 +940,7 @@ function yeniElEkle() {
     k.style.display = 'block';
   });
   
-  // Kalan butonu eksikse geri ekle
+  // Kalan butonu eksikse geri ekle (cloneNode bazen butonu input sanıp kopyalamayı atlayabilir)
   yeniSatir.querySelectorAll('.player-cell').forEach(cell => {
     const acmaKat = cell.querySelector('.kategori');
     let kalanBtn = acmaKat.querySelector('[data-role="kalan"]');
@@ -975,128 +955,32 @@ function yeniElEkle() {
   });
 
   tbody.appendChild(yeniSatir);
-  roleriAta(); // Yeni eklenen satırın butonlarına rolleri at
+  roleriAta(); 
 }
-
-// Her tıklamadan sonra yeni el kontrolü
-document.addEventListener('click', (e) => {
-  const hedef = e.target.closest('.secenek, .masa-btn, .artir, .azalt');
-  if (!hedef) return;
-  
-  // Kalan inputta Enter'a basılınca veya blur olunca da tetiklenebilir
-  setTimeout(() => {
-    const tbody = document.querySelector('tbody');
-    const satirlar = tbody.querySelectorAll('tr');
-    const sonSatir = satirlar[satirlar.length - 1];
-
-    if (tumOyuncularAldiMi(sonSatir)) {
-      yeniElEkle();
-      stateKaydet(); // Yeni el eklenince kaydet
-    }
-  }, 100);
-});
-
-document.addEventListener('click', (e) => {
-  const hedef = e.target.closest('.secenek, .masa-btn, .artir, .azalt');
-  if (!hedef) return;
-
-  const aktifSatirlar = document.querySelectorAll('tbody tr');
-  if (aktifSatirlar.length < 2) return;
-
-  const tiklananSatir = hedef.closest('tr');
-  const tiklananIndex = Array.from(aktifSatirlar).indexOf(tiklananSatir);
-  const sonIndex = aktifSatirlar.length - 1;
-  const oncekiSatir = aktifSatirlar[sonIndex - 1];
-  const sonSatir = aktifSatirlar[sonIndex];
-
-  // 🔹 1. Yeni el aktif olunca önceki eli pasifleştir
-  if (tiklananIndex === sonIndex) {
-    oncekiSatir.querySelectorAll('.secenek, .masa-btn, .artir, .azalt, .kalan-input').forEach(el => {
-      el.classList.add('pasif');
-      el.style.pointerEvents = 'none';
-      el.style.opacity = '0.5';
-    });
-  }
-
-  // 🔹 2. Her tıklamadan sonra kontrol: son elde hiç seçim kalmadıysa, önceki eli geri aktif et
-  setTimeout(() => {
-    const aktifVarMi = sonSatir.querySelector('.secenek.aktif, .masa-btn.aktif, .bitti-ekstra');
-    const kalanInputVarMi = sonSatir.querySelector('.kalan-input');
-    let cezaVarMi = false;
-    sonSatir.querySelectorAll('.ceza-satiri span').forEach(sp => {
-      if (parseInt(sp.textContent || '0', 10) > 0) cezaVarMi = true;
-    });
-
-    // Eğer hiçbir aktif seçim, input ya da ceza yoksa:
-    if (!aktifVarMi && !kalanInputVarMi && !cezaVarMi) {
-      oncekiSatir.querySelectorAll('.secenek, .masa-btn, .artir, .azalt, .kalan-input').forEach(el => {
-        el.classList.remove('pasif');
-        el.style.pointerEvents = 'auto';
-        el.style.opacity = '1';
-      });
-    }
-    toplamPuanHesapla();
-  }, 100);
-});
 
 document.addEventListener('input', (e) => {
   const input = e.target.closest('.kalan-input');
   if (!input) {
-      // Oyuncu isimleri değişince de puan hesaplansın (gerekmez ama tutarlılık için)
       if (e.target.classList.contains('oyuncu-isim')) {
-          setTimeout(toplamPuanHesapla, 0);
+          setTimeout(anaIslemleriYap, 0); // Sadece kaydet ve puan hesapla
       }
       return;
   }
-
-  const row = input.closest('tr');
-  const tbody = row.closest('tbody');
-  const satirlar = tbody.querySelectorAll('tr');
-  const sonIndex = satirlar.length - 1;
-  const sonSatir = satirlar[sonIndex];
-  const oncekiSatir = satirlar[sonIndex - 1];
-
-  // Eğer bu input son eldeyse ve tamamen temizlendiyse:
-  if (row === sonSatir && input.value.trim() === '') {
-    // Diğer aktif elemanlar da yoksa geri aktif yap
-    const aktifVarMi = sonSatir.querySelector('.secenek.aktif, .masa-btn.aktif, .bitti-ekstra');
-    let cezaVarMi = false;
-    sonSatir.querySelectorAll('.ceza-satiri span').forEach(sp => {
-      if (parseInt(sp.textContent || '0', 10) > 0) cezaVarMi = true;
-    });
-
-    if (!aktifVarMi && !cezaVarMi && satirlar.length >= 2) {
-      oncekiSatir.querySelectorAll('.secenek, .masa-btn, .artir, .azalt, .kalan-input').forEach(el => {
-        el.classList.remove('pasif');
-        el.style.pointerEvents = 'auto';
-        el.style.opacity = '1';
-      });
-    }
-  }
-  
-  // Yeni el kontrolü:
-  setTimeout(() => {
-    if (tumOyuncularAldiMi(sonSatir)) {
-      yeniElEkle();
-      stateKaydet(); 
-    }
-  }, 100);
-
-  toplamPuanHesapla();
+  // Kalan input değişimi için blur event'i handleKalan içinde çağırıyor.
 });
+
 
 // 🔹 TOPLAM PUAN HESAPLAMA FONKSİYONU
 function toplamPuanHesapla() {
   const tbody = document.querySelector('tbody');
   const satirlar = tbody.querySelectorAll('tr');
-  const toplamlar = [0, 0, 0, 0]; // Oyuncu 1-4 toplam puanları
+  const toplamlar = [0, 0, 0, 0]; 
 
   satirlar.forEach(row => {
     const hucreler = row.querySelectorAll('.player-cell');
     let bitenIndex = null;
     let carpim = 1;
 
-    // 🔹 Önce kimin "bitti" olduğunu ve çarpanı tespit et
     hucreler.forEach((cell, i) => {
       const bittiBtn = cell.querySelector('.secenek[data-role="bitti"].aktif');
       const okey = cell.querySelector('.bitti-ekstra .okey.aktif');
@@ -1111,8 +995,8 @@ function toplamPuanHesapla() {
     });
 
     const elPuanlari = [0, 0, 0, 0];
+    const takimEs = { 0: 1, 1: 0, 2: 3, 3: 2 };
 
-    // 🔸 Her oyuncunun puanını hesapla
     hucreler.forEach((cell, i) => {
       const acmadi = cell.querySelector('.secenek[data-role="acmadi"].aktif');
       const kalanInput = cell.querySelector('.kalan-input');
@@ -1128,18 +1012,14 @@ function toplamPuanHesapla() {
       if (acmadi) puan += 202;
       else if (kalanInput && kalanInput.value) puan += parseInt(kalanInput.value);
       else if (bittiBtn) {
-        if (okey && elden) puan -= 202;
-        else if (okey) puan -= 101;
-        else if (elden) puan -= 202;
+        if (okey && elden) puan -= 404;
+        else if (okey || elden) puan -= 202;
         else puan -= 101;
       }
 
-      // 🔸 Masa cezası
-      if (masa) puan += 101; // Masa (masayı açtırmadan oynamak) ceza puanı (eksi değil artı) olmalı
+      // 🔸 Masa ve diğer cezalar
+      if (masa) puan += 101; 
       
-      // Biten oyuncu için Masa/Okey/Elden puanı 101/202/404 zaten yukarıda Bitti butonu tıklandığında düşülüyor (-101/ -202 / -404)
-      
-      // 🔸 Cezalar (çarpan dışında)
       cezalar.forEach(span => {
         const adet = parseInt(span.textContent || '0', 10);
         if (adet > 0) puan += adet * 101;
@@ -1147,9 +1027,6 @@ function toplamPuanHesapla() {
 
       elPuanlari[i] = puan;
     });
-
-    // 🔹 Takım eşleri
-    const takimEs = { 0: 1, 1: 0, 2: 3, 3: 2 };
 
     // 🔸 Biten oyuncu varsa özel durumlar
     if (bitenIndex !== null) {
@@ -1159,7 +1036,6 @@ function toplamPuanHesapla() {
       const esCell = hucreler[esIndex];
       let cezaToplam = 0;
 
-      // Takım arkadaşının cezalarını topla (Masa, İşlek, Hatalı Açma, Okey Kaptırma)
       const masa = esCell.querySelector('.masa-btn.aktif');
       if (masa) cezaToplam += 101;
 
@@ -1168,9 +1044,9 @@ function toplamPuanHesapla() {
         const adet = parseInt(span.textContent || '0', 10);
         if (adet > 0) cezaToplam += adet * 101;
       });
-      elPuanlari[esIndex] = cezaToplam; // Sadece ceza etkileri kalır (0 veya pozitif)
+      elPuanlari[esIndex] = cezaToplam; 
 
-      // Diğer iki oyuncunun puanı çarpılır (Biten oyuncu ve takım arkadaşı dışındakiler)
+      // Diğer iki oyuncunun puanı çarpılır 
       hucreler.forEach((_, i) => {
         if (i !== bitenIndex && i !== esIndex) {
           elPuanlari[i] *= carpim;
