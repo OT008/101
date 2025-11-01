@@ -1,3 +1,15 @@
+// Hata yakalama
+window.addEventListener('error', function(e) {
+    console.error('Global hata:', e.error);
+});
+
+// Sayfa yüklendiğinde
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Sayfa yüklendi');
+    // Fonksiyonlarınızı burada çağırın
+    roleriAta();
+    stateYukle();
+});
 // =========================  KAYDET / YÜKLE / SIFIRLA  =========================
 const LS_KEY = 'okey101_state_v1';
 
