@@ -1,5 +1,3 @@
-<script>
-
 
 // =========================  KAYDET / YÜKLE / SIFIRLA  =========================
 const LS_KEY = 'okey101_state_v1';
