@@ -44,7 +44,13 @@ function stateTopla() {
 }
 
 function stateUygula(state) {
-  if (!state || !state.eller?.length) return;
+	if (!state || !state.eller?.length || state.eller.length > 20) {
+  console.warn("Geçersiz state tespit edildi, sıfırlanıyor.");
+  localStorage.removeItem(LS_KEY);
+  location.reload();
+  return;
+}
+ // if (!state || !state.eller?.length) return;
 
   // Oyuncu isimleri
   const isimInputlari = document.querySelectorAll('thead .oyuncu-isim');
