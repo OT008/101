@@ -490,7 +490,9 @@ while (tbody.querySelectorAll('tr').length < hedefElSayisi) {
     const sonAktif = !!son.querySelector('.secenek.aktif, .masa-btn.aktif, .bitti-ekstra') ||
                      !!son.querySelector('.kalan-input');
     let sonCezali = false;
-    son.querySelectorAll('.ceza-satiri span').forEach(sp => { if (parseInt(sp.textContent||'0',10) > 0) sonCezali = true; });
+    son.querySelectorAll('.ceza-satiri span').forEach(sp => {
+      if (parseInt(sp.textContent || '0', 10) > 0) sonCezali = true;
+    });
 
     if (sonAktif || sonCezali) {
       setTimeout(() => {
@@ -500,6 +502,24 @@ while (tbody.querySelectorAll('tr').length < hedefElSayisi) {
           el.style.opacity = '0.5';
         });
       }, 0);
+    }
+  }
+
+  if (aktifSatirlar.length >= 2) {
+    const onceki = aktifSatirlar[aktifSatirlar.length - 2];
+    const son    = aktifSatirlar[aktifSatirlar.length - 1];
+
+    const sonAktif = !!son.querySelector('.secenek.aktif, .masa-btn.aktif, .bitti-ekstra') ||
+                     !!son.querySelector('.kalan-input');
+    let sonCezali = false;
+    son.querySelectorAll('.ceza-satiri span').forEach(sp => { if (parseInt(sp.textContent||'0',10) > 0) sonCezali = true; });
+
+    if (sonAktif || sonCezali) {
+      onceki.querySelectorAll('.secenek, .masa-btn, .artir, .azalt, .kalan-input').forEach(el => {
+        el.classList.add('pasif');
+        el.style.pointerEvents = 'none';
+        el.style.opacity = '0.5';
+      });
     }
   }
   
