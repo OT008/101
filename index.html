@@ -376,7 +376,6 @@ function stateTopla() {
 
 function stateUygula(state) {
   if (!state || !state.eller?.length) return;
-  if (!Array.isArray(state.eller) || state.eller.length > 100) return;
 
   // Oyuncu isimleri
   const isimInputlari = document.querySelectorAll('thead .oyuncu-isim');
@@ -384,18 +383,7 @@ function stateUygula(state) {
 
   // El sayısını eşitle (gerekenden azsa yeniElEkle ile çoğalt)
   const tbody = document.querySelector('tbody');
-  const mevcutElSayisi = tbody.querySelectorAll('tr').length;
-const hedefElSayisi = state.eller.length;
-
-// Fazla satır varsa sil
-while (tbody.querySelectorAll('tr').length > hedefElSayisi) {
-  tbody.removeChild(tbody.lastElementChild);
-}
-
-// Eksikse ekle
-while (tbody.querySelectorAll('tr').length < hedefElSayisi) {
-  yeniElEkle();
-}
+  while (tbody.querySelectorAll('tr').length < state.eller.length) {
     yeniElEkle();
   }
 
@@ -483,28 +471,6 @@ while (tbody.querySelectorAll('tr').length < hedefElSayisi) {
 
   // Önceki el kilitleme durumunu tekrar uygula (son el doluysa bir öncekini pasifleştir)
   const aktifSatirlar = tbody.querySelectorAll('tr');
-  if (aktifSatirlar.length >= 2) {
-    const onceki = aktifSatirlar[aktifSatirlar.length - 2];
-    const son    = aktifSatirlar[aktifSatirlar.length - 1];
-
-    const sonAktif = !!son.querySelector('.secenek.aktif, .masa-btn.aktif, .bitti-ekstra') ||
-                     !!son.querySelector('.kalan-input');
-    let sonCezali = false;
-    son.querySelectorAll('.ceza-satiri span').forEach(sp => {
-      if (parseInt(sp.textContent || '0', 10) > 0) sonCezali = true;
-    });
-
-    if (sonAktif || sonCezali) {
-      setTimeout(() => {
-        onceki.querySelectorAll('.secenek, .masa-btn, .artir, .azalt, .kalan-input').forEach(el => {
-          el.classList.add('pasif');
-          el.style.pointerEvents = 'none';
-          el.style.opacity = '0.5';
-        });
-      }, 0);
-    }
-  }
-
   if (aktifSatirlar.length >= 2) {
     const onceki = aktifSatirlar[aktifSatirlar.length - 2];
     const son    = aktifSatirlar[aktifSatirlar.length - 1];
