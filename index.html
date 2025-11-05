@@ -385,8 +385,17 @@ function stateUygula(state) {
   // El sayısını eşitle (gerekenden azsa yeniElEkle ile çoğalt)
   const tbody = document.querySelector('tbody');
   const mevcutElSayisi = tbody.querySelectorAll('tr').length;
-const hedefElSayisi = Math.min(state.eller.length, mevcutElSayisi + 2);
+const hedefElSayisi = state.eller.length;
+
+// Fazla satır varsa sil
+while (tbody.querySelectorAll('tr').length > hedefElSayisi) {
+  tbody.removeChild(tbody.lastElementChild);
+}
+
+// Eksikse ekle
 while (tbody.querySelectorAll('tr').length < hedefElSayisi) {
+  yeniElEkle();
+}
     yeniElEkle();
   }
 
